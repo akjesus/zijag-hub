@@ -1,0 +1,85 @@
+<div class="container mt-4">
+  <h2>Dashboard Overview</h2>
+  <div class="stat-grid mt-4">
+    <a
+      href="#incomes"
+      data-page="incomes"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Income</h4>
+        <p>
+          <i class="fa-solid fa-money-bills"></i>
+          <span id="income-total">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#expenses"
+      data-page="expenses"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+
+      <div class="stat-box">
+        <h4>Expenses</h4>
+        <p>
+          <i class="fa-solid fa-money-bills"></i>
+          <span id="expense-total">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#inventory"
+      data-page="inventory"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4> Inventory</h4>
+        <p>
+          <i class="fas fa-file-alt"></i>
+          <span id="costPrice">Cost Price...</span>
+          <span id="sellingPrice">Selling Price...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#staff"
+      data-page="staff"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Staff</h4>
+
+        <p>
+          <i class="fas fa-users"></i> <span id="staff-count">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#question-bank"
+      data-page="questionBank"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Reports</h4>
+        <p>
+          <i class="fas fa-book"></i>
+          <span id="question-count">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a href="#school" data-page="school"
+    onclick="loadPage(this.getAttribute('data-page'))">
+      <div class="stat-box">
+        <h4>Business</h4>
+        <p>
+          <i class="fas fa-school"></i> <span id="business_name">Loading...</span>
+        </p>
+      </div>
+    </a>
+  </div>
+</div>
+<script>
+  delete showingAll;
+  fetchAdminDashboard();
+</script>
