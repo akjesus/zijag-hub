@@ -14,7 +14,7 @@ Features
 
 Installation
 
-1. Clone the repository: git clone https://github.com/your-repo/accounting-software.git
+1. Clone the repository: git clone https://github.com/akjesus/zijag-hub.git
 2. Install dependencies: npm install
 3. Start the application: npm start
 

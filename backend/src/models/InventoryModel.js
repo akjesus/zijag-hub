@@ -45,8 +45,8 @@ InventorySchema.statics.getTotal = async function () {
     {
       $group: {
         _id: null,
-        costPriceTotal: { $sum: "$costPrice" },
-        sellingPriceTotal: { $sum: "$sellingPrice" },
+        costPriceTotal: { $sum: { $multiply: ["$costPrice", "$quantity"] } },
+        sellingPriceTotal: { $sum: { $multiply: ["$sellingPrice", "$quantity"] } },
       },
     },
   ]);

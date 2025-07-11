@@ -6,7 +6,7 @@
       data-page="incomes"
       onclick="loadPage(this.getAttribute('data-page'))"
     >
-      <div class="stat-box">
+      <div class="stat-box primary">
         <h4>Income</h4>
         <p>
           <i class="fa-solid fa-money-bills"></i>
@@ -29,6 +29,20 @@
       </div>
     </a>
     <a
+      href="#sales"
+      data-page="sales"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+
+      <div class="stat-box">
+        <h4>Sales</h4>
+        <p>
+          <i class="fa-solid fa-money-bills"></i>
+          <span id="total-sales">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
       href="#inventory"
       data-page="inventory"
       onclick="loadPage(this.getAttribute('data-page'))"
@@ -36,28 +50,31 @@
       <div class="stat-box">
         <h4> Inventory</h4>
         <p>
-          <i class="fas fa-file-alt"></i>
+          <i class="fa-solid fa-money-bills"></i>
           <span id="costPrice">Cost Price...</span>
+          </p>
+          <p>
+            <i class="fa-solid fa-money-bills"></i>
           <span id="sellingPrice">Selling Price...</span>
         </p>
       </div>
     </a>
     <a
-      href="#staff"
-      data-page="staff"
+      href="#users"
+      data-page="users"
       onclick="loadPage(this.getAttribute('data-page'))"
     >
       <div class="stat-box">
-        <h4>Staff</h4>
+        <h4>Users</h4>
 
         <p>
-          <i class="fas fa-users"></i> <span id="staff-count">Loading...</span>
+          <i class="fas fa-users"></i> <span id="user-count">Loading...</span>
         </p>
       </div>
     </a>
     <a
-      href="#question-bank"
-      data-page="questionBank"
+      href="#reports"
+      data-page="reports"
       onclick="loadPage(this.getAttribute('data-page'))"
     >
       <div class="stat-box">
@@ -68,7 +85,7 @@
         </p>
       </div>
     </a>
-    <a href="#school" data-page="school"
+    <!-- <a href="#school" data-page="school"
     onclick="loadPage(this.getAttribute('data-page'))">
       <div class="stat-box">
         <h4>Business</h4>
@@ -76,7 +93,7 @@
           <i class="fas fa-school"></i> <span id="business_name">Loading...</span>
         </p>
       </div>
-    </a>
+    </a> -->
   </div>
 </div>
 <script>

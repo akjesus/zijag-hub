@@ -1,4 +1,8 @@
-const db = require("../config/database");
+
+const Income = require("../models/IncomeModel");
+const Expense = require("../models/ExpensesModel");
+const Inventory = require("../models/InventoryModel");
+const Sales = require("../models/SalesModel");
 
 exports.getExamDetailedReport = async (req, res) => {
   try {
@@ -116,6 +120,65 @@ exports.getExamDetailedReport = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+exports.getSummaryReport = async (req, res) => {
+  //FETCH income, expenses, and inventory cost/selling price from mongoDB by date range
+  try {
+    if (!req.body.startDate || !req.body.endDate) {
+      return res.status(400).json({ error: "startDate and endDate query parameters are required" });
+    }
+    const { startDate, endDate } = req.body;
+    const income = await Income.getTotal({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
+    const expense = await Expense.getTotal({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
+    const inventory = await Inventory.getTotal({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
+
+    res.json({ income, expense, inventory  });
+  } catch (err) {
+    console.error("Summary Report Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getBestSellingProducts = async (req, res) => {
+  try {
+    const products = await Sales.aggregate([
+      {
+        $group: {
+          _id: "$description",
+          totalSold: { $sum: "$quantity" },
+          totalRevenue: { $sum: { $multiply: ["$amount", "$quantity"] } },
+        },
+      },
+      {
+        $sort: { totalSold: -1 }, // Sort by total sold descending
+      },
+      {
+        $limit: 10, // Get top 10 best-selling products
+      },
+    ]);
+
+    res.json(products);
+  } catch (err) {
+    console.error("Best Selling Products Error:", err);
     res.status(500).json({ error: err.message });
   }
 };

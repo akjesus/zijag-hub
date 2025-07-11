@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const IncomeController = require("../controllers/IncomeController");
-const {verifyToken, isAdmin} = require("../controllers/authController");
+const { verifyToken, isAdmin } = require("../controllers/AuthController");
 
 
 router.get("/", IncomeController.getAllIncome);

@@ -1,6 +1,8 @@
 const Income = require("../models/IncomeModel");
 const Expense = require("../models/ExpensesModel");
 const Inventory = require("../models/InventoryModel");
+const Users = require("../models/UserModel");
+const Sales = require("../models/SalesModel");
 
 let data = {}
 exports.getDashboardStats = async (req, res) => {
@@ -21,6 +23,13 @@ exports.getDashboardStats = async (req, res) => {
           data.sellingPriceTotal = total.sellingPriceTotal;
         } 
       );
+      //get user count
+    const userCount = await Users.countDocuments();
+    data.userCount = userCount;
+
+    // get total sales amount
+    const totalSales = await Sales.getTotal();
+    data.totalSales = totalSales;
 
     res.json({... data,
       business_name:  "Zijag Hub"

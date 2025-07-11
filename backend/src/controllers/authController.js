@@ -70,7 +70,7 @@ exports.createUser= async (req, res) => {
   };
   
 
-  exports.logout = (req, res) => {
+exports.logout = (req, res) => {
       const token = req.headers.authorization?.split(" ")[1];
       if (token) {
           blacklistedTokens.add(token); // Add token to blacklist
@@ -79,7 +79,7 @@ exports.createUser= async (req, res) => {
   };
 
   
-  exports.verifyToken = (req, res, next) => {
+exports.verifyToken = (req, res, next) => {
       const token = req.headers.authorization?.split(" ")[1];
       
       if (!token) {
@@ -94,7 +94,7 @@ exports.createUser= async (req, res) => {
       });
   };
 
-  exports.makeAdmin = async (req, res) => {
+exports.makeAdmin = async (req, res) => {
     try {
       const { userId } = req.body;
       if (!userId) {
@@ -115,9 +115,25 @@ exports.createUser= async (req, res) => {
     }
   }
 
-  exports.isAdmin = (req, res, next) => {
+exports.isAdmin = (req, res, next) => {
     if (req.user.role !== "Admin") {
       return res.status(403).json({ error: "Access denied. Admins only." });
     }
     next();
   }
+
+//get all users
+exports.getAllUsers = async (req, res) => {
+    try {
+      const users = await User.find({}, "-password"); // Exclude password field
+      const result = users.map((item, index) => ({
+        serialNumber: index + 1,
+        ...item.toObject(),
+      }));
+      return res.status(200).json(result);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      res.status(500).json({ error: err.message });
+    }
+  };
+

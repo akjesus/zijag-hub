@@ -34,11 +34,19 @@ function fetchAdminDashboard() {
       document.getElementById("expense-total").innerHTML = data.expense
         ? `N${data.expense}` + " Paid"
         : "No Expenses Yet";
-      document.getElementById("costPrice").innerHTML = data.costPriceTotal 
-      ? `N${data.costPriceTotal}` + " Cost Price Total" : "No Cost Price Data";
+      document.getElementById("costPrice").innerHTML = data.costPriceTotal
+        ? `N${data.costPriceTotal}` + " Cost Price Total"
+        : "No Cost Price Data";
       document.getElementById("sellingPrice").innerText = data.sellingPriceTotal
         ? `N${data.sellingPriceTotal}` + " Selling Price Total"
         : "No Selling Price Data";
+        //User count
+      document.getElementById("user-count").innerHTML = data.userCount
+        ? `${data.userCount} Users`
+        : "No User Data";
+      document.getElementById("total-sales").innerHTML = data.totalSales
+        ? `N${data.totalSales}` + " Total Sales"
+        : "No Sales Data";
       document.getElementById("business_name").innerHTML= data.business_name;
     })
     .catch((error) => console.error("Error loading dashboard:", error));

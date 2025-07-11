@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();    
 
 const InventoryController = require("../controllers/InventoryController");
-const { verifyToken, isAdmin } = require("../controllers/authController");
+const { verifyToken, isAdmin } = require("../controllers/AuthController");
 
 // Get all inventories
 router.get("/", InventoryController.getAllInventories);

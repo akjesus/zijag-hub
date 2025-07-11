@@ -1,5 +1,6 @@
 const Inventory = require('../models/InventoryModel');
 const Income = require('../models/IncomeModel');
+const Sales = require('../models/SalesModel');
 const csvParser = require("csv-parser");
 const stream = require("stream");
 
@@ -163,7 +164,15 @@ exports.sellInventoryItem = async (req, res) => {
             category: inventory.category,
             amount: inventory.sellingPrice * quantity,
             source: source,
-            description: `Sold ${quantity} pcs of ${inventory.name}`,
+            description: `Sold ${quantity} pcs of "<b>${inventory.name}</b>"`,
+            createdBy: req.user.id
+        });
+        await Sales.create({
+            description: `Sold ${quantity} pcs of "<b>${inventory.name}</b>"`,
+            category: inventory.category,
+            amount: inventory.sellingPrice * quantity,
+            quantity: quantity,
+            source: source,
             createdBy: req.user.id
         });
         res.status(200).json({ message: "Inventory item sold successfully", inventory });
