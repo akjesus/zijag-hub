@@ -26,7 +26,7 @@
     <p><strong>Report Type:</strong> <span id="reportType"></span></p>
     <p><strong>Item:</strong> <span id="reportTypeName"></span></p>
     <p><strong>Amount Generated:</strong> <span id="reportBestAmount"></span></p>
-    <p><strong>Number of Items:</strong> <span id="reportBestCount"></span></p>
+    <p id = "reportBestCountItem"><strong>Number of Items:</strong> <span id="reportBestCount"></span></p>
   </div>
 
   <!-- Summary Cards -->
@@ -212,15 +212,23 @@
             });
             const data = await res.json()
             console.log(data)
+            const totalAmountgen = naira(data[2].totalIncome + data[1].totalIncome + data[0].totalIncome)
+            document.getElementById("InfoSection").style.display = "block";
+            document.getElementById("reportType").textContent = "Top 3 Income Sources";
+            document.getElementById("reportTypeName").textContent = "Income";
+            document.getElementById("reportBestAmount").textContent = totalAmountgen || 0;
+            document.getElementById("reportBestCountItem").style.display = "none";
             document.getElementById("summaryCards").style.display = "block";
+            document.getElementById("breakdownSection").style.display = "none";
+            document.getElementById("breakdownSection2").style.display = "none";
             document.getElementById("incomeHeader0").textContent = data[0]._id;
             document.getElementById("incomeHeader1").textContent = data[1]._id;
             document.getElementById("incomeHeader2").textContent = data[2]._id;
             document.getElementById("totalSales").textContent = naira(data[0].totalIncome) || 0;
             document.getElementById("totalSalesQuantity").textContent = naira(data[1].totalIncome) || 0;
             document.getElementById("reportBestAmountVal").textContent = naira(data[2].totalIncome) || 0;
-            document.getElementById("incomeHeader3").textContent = "Total Income for Period";
-            document.getElementById("reportAverageSales").textContent = naira(data[2].totalIncome + data[1].totalIncome + data[0].totalIncome) || 0;
+            document.getElementById("incomeHeader3").textContent = "Total Income from Sources";
+            document.getElementById("reportAverageSales").textContent = totalAmountgen || 0;
           }
           catch (error) {
 
