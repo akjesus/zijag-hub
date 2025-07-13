@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const reportController = require("../controllers/reportController");
+const ReportController = require("../controllers/ReportController");
 
 // GET detailed report for an exam (optional department filter)
-router.get("/exam/:exam_id", reportController.getExamDetailedReport);
+router.get("/exam/:exam_id", ReportController.getExamDetailedReport);
 
 //get summary report for an inventory, income, and expense
-router.get("/summary", reportController.getSummaryReport);
+router.get("/summary", ReportController.getSummaryReport);
+router.get("/sales", ReportController.sellingItems);
 
 module.exports = router;
+

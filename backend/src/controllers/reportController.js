@@ -1,8 +1,8 @@
-
 const Income = require("../models/IncomeModel");
 const Expense = require("../models/ExpensesModel");
 const Inventory = require("../models/InventoryModel");
 const Sales = require("../models/SalesModel");
+const Category = require('../models/CategoryModel')
 
 exports.getExamDetailedReport = async (req, res) => {
   try {
@@ -158,27 +158,74 @@ exports.getSummaryReport = async (req, res) => {
   }
 };
 
-exports.getBestSellingProducts = async (req, res) => {
+exports.sellingItems = async (req, res) => {
+  const { startDate, endDate } = req.query;
+  if (!startDate || !endDate) {
+    return res
+      .status(400)
+      .json({ message: "Start date and end date are required" });
+  }
   try {
-    const products = await Sales.aggregate([
+    const best = await Sales.aggregate([
       {
         $group: {
           _id: "$description",
-          totalSold: { $sum: "$quantity" },
-          totalRevenue: { $sum: { $multiply: ["$amount", "$quantity"] } },
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
         },
       },
       {
-        $sort: { totalSold: -1 }, // Sort by total sold descending
+        $sort: { totalAmount: -1 },
       },
       {
-        $limit: 10, // Get top 10 best-selling products
+        $limit: 3,
       },
     ]);
+    const worst = await Sales.aggregate([
+      {
+        $group: {
+          _id: "$description",
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalAmount: 1 },
+      },
+      {
+        $limit: 3,
+      },
+    ]);
+    const totalSales = await Sales.getTotal();
+    const cat = await Sales.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalAmount: -1 },
+      },
+      {
+        $limit: 3,
+      },
+    ]);
+    const bestSellingCat = await Category.findById(cat[0]._id);
 
-    res.json(products);
-  } catch (err) {
-    console.error("Best Selling Products Error:", err);
-    res.status(500).json({ error: err.message });
+    //calculate sales from best selling category
+    
+    res.status(200).json({
+      best,
+      worst,
+      totalSales,
+      bestSellingCategory: bestSellingCat.name,
+      categoryTotalsales: cat[0].totalAmount,
+      categorySalesCount: cat[0].count
+    });
+  } catch (error) {
+    console.log("Error fetching best selling items:", error);
+    res.status(500).json({ error: error.message });
   }
 };

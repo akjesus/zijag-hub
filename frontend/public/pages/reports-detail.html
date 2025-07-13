@@ -124,14 +124,8 @@
         return;
       }
 
-      let endpoint = API_URL + `${type}`;
-      if(type === "incomes") {
-        endpoint += `/report?startDate=${startDate}&endDate=${endDate}`;
-      } else if(type === "sales") {
-        endpoint += `/selling-items?startDate=${startDate}&endDate=${endDate}`;
-      } else if(type === "expenses") {
-        endpoint += `/report?startDate=${startDate}&endDate=${endDate}`;
-      } else {
+      let endpoint = API_URL + "reports/" + `${type}` + `/?startDate=${startDate}&endDate=${endDate}`;
+      if(!type) {
         alert("Please select a valid type.");
         return;
       }

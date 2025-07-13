@@ -8,10 +8,6 @@ const SalesController = require("../controllers/SalesController");
 router.post("/", verifyToken, isAdmin, SalesController.createSales);
 router.get("/", SalesController.getAllSales);
 
-router
-  .get("/selling-items", verifyToken, isAdmin, SalesController.sellingItems)
-
-
 router.get("/:id", SalesController.findSalesById).put(
   "/:id",   
   verifyToken,
