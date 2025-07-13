@@ -7,7 +7,9 @@ router.get("/exam/:exam_id", ReportController.getExamDetailedReport);
 
 //get summary report for an inventory, income, and expense
 router.get("/summary", ReportController.getSummaryReport);
-router.get("/sales", ReportController.sellingItems);
+router.get("/sales", ReportController.salesReport);
+router.get("/incomes", ReportController.incomeReport);
+router.get("/expenses", ReportController.expenseReport);
 
 module.exports = router;
 

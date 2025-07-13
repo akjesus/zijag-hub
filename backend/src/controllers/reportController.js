@@ -158,8 +158,12 @@ exports.getSummaryReport = async (req, res) => {
   }
 };
 
-exports.sellingItems = async (req, res) => {
+exports.salesReport = async (req, res) => {
   const { startDate, endDate } = req.query;
+  const start = new Date(startDate);
+	const end = new Date(endDate);
+	end.setHours(23, 59, 59, 999);
+
   if (!startDate || !endDate) {
     return res
       .status(400)
@@ -167,52 +171,71 @@ exports.sellingItems = async (req, res) => {
   }
   try {
     const best = await Sales.aggregate([
-      {
-        $group: {
-          _id: "$description",
-          totalAmount: { $sum: "$amount" },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $sort: { totalAmount: -1 },
-      },
-      {
-        $limit: 3,
-      },
-    ]);
+			{
+				$match: {
+					createdAt: { $gte: start, $lte: end },
+				},
+			},
+			{
+				$group: {
+					_id: "$description",
+					totalAmount: { $sum: "$amount" },
+					count: { $sum: 1 },
+				},
+			},
+			{
+				$sort: { totalAmount: -1 },
+			},
+			{
+				$limit: 3,
+			},
+		]);
     const worst = await Sales.aggregate([
-      {
-        $group: {
-          _id: "$description",
-          totalAmount: { $sum: "$amount" },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $sort: { totalAmount: 1 },
-      },
-      {
-        $limit: 3,
-      },
-    ]);
+			{
+				$match: {
+					createdAt: { $gte: start, $lte: end },
+				},
+			},
+			{
+				$group: {
+					_id: "$description",
+					totalAmount: { $sum: "$amount" },
+					count: { $sum: 1 },
+				},
+			},
+			{
+				$sort: { totalAmount: 1 },
+			},
+			{
+				$limit: 3,
+			},
+		]);
     const totalSales = await Sales.getTotal();
     const cat = await Sales.aggregate([
-      {
-        $group: {
-          _id: "$category",
-          totalAmount: { $sum: "$amount" },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $sort: { totalAmount: -1 },
-      },
-      {
-        $limit: 3,
-      },
+			{
+				$match: {
+					createdAt: { $gte: start, $lte: end },
+				},
+			},
+			{
+				$group: {
+					_id: "$category",
+					totalAmount: { $sum: "$amount" },
+					count: { $sum: 1 },
+				},
+			},
+			{
+				$sort: { totalAmount: -1 },
+			},
+			{
+				$limit: 3,
+			},
     ]);
-    const bestSellingCat = await Category.findById(cat[0]._id);
+    console.log(cat)
+    if (!cat.length) {
+      return res.status(404).json({ error: "No data for this date range" });
+    }
+    const bestSellingCat = await Category.findById(cat);
 
     //calculate sales from best selling category
     
@@ -229,3 +252,46 @@ exports.sellingItems = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+exports.incomeReport = async (req, res) => {
+  const { startDate, endDate } = req.query;
+  const start = new Date(startDate);
+	const end = new Date(endDate);
+	end.setHours(23, 59, 59, 999);
+  console.log(new Date(startDate), new Date(endDate));
+  if (!startDate || !endDate) {
+    return res
+      .status(400)
+      .json({ message: "Start date and end date are required" });
+  }
+  const result = await Income.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: start, $lte: end },
+			},
+		},
+
+		{
+			$group: {
+				_id: "$source",
+				totalIncome: {
+					$sum: "$amount",
+				},
+			},
+		},
+		{
+			$limit: 3,
+		},
+	]);
+
+
+return res.json(result);
+
+
+
+}
+exports.expenseReport = async(req, res)=> {
+  console.log(req.query)
+  return res.json({message: "Route Works"});
+}

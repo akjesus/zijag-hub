@@ -168,13 +168,13 @@ exports.sellInventoryItem = async (req, res) => {
             createdBy: req.user.id
         });
         await Sales.create({
-            description: `${quantity} pcs of "${inventory.name}"`,
-            category: inventory.category,
-            amount: inventory.sellingPrice,
-            quantity: quantity,
-            source: source,
-            createdBy: req.user.id
-        });
+					description: `${quantity} pcs of "${inventory.name}"`,
+					category: inventory.category,
+					amount: inventory.sellingPrice * quantity,
+					quantity: quantity,
+					source: source,
+					createdBy: req.user.id,
+				});
         res.status(200).json({ message: "Inventory item sold successfully", inventory });
     } catch (err) {
         res.status(500).json({ error: err.message });

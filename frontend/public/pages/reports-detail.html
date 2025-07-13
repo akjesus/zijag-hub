@@ -26,7 +26,7 @@
     <p><strong>Report Type:</strong> <span id="reportType"></span></p>
     <p><strong>Item:</strong> <span id="reportTypeName"></span></p>
     <p><strong>Amount Generated:</strong> <span id="reportBestAmount"></span></p>
-    <p><strong>Number of Sales:</strong> <span id="reportBestCount"></span></p>
+    <p><strong>Number of Items:</strong> <span id="reportBestCount"></span></p>
   </div>
 
   <!-- Summary Cards -->
@@ -34,7 +34,7 @@
     <div class="row">
       <div class="col-md-3">
         <div class="card text-white bg-primary mb-3">
-          <div class="card-header">Total Sales</div>
+          <div class="card-header" id="incomeHeader0">Total Sales</div>
           <div class="card-body">
             <h5 class="card-title" id="totalSales">0</h5>
           </div>
@@ -42,7 +42,7 @@
       </div>
       <div class="col-md-3">
         <div class="card text-white bg-success mb-3">
-          <div class="card-header">Total Sales Quantity </div>
+          <div class="card-header" id = "incomeHeader1">Total Sales Quantity </div>
           <div class="card-body">
             <h5 class="card-title" id="totalSalesQuantity">0</h5>
           </div>
@@ -50,7 +50,7 @@
       </div>
       <div class="col-md-3">
         <div class="card text-white bg-info mb-3">
-          <div class="card-header">Category Sales</div>
+          <div class="card-header" id = "incomeHeader2">Category Sales</div>
           <div class="card-body">
             <h5 class="card-title" id="reportBestAmountVal">0</h5>
           </div>
@@ -58,7 +58,7 @@
       </div>
       <div class="col-md-3">
         <div class="card text-white bg-warning mb-3">
-          <div class="card-header">Average Sales Per Day</div>
+          <div class="card-header" id = "incomeHeader3">Average Sales Per Day</div>
           <div class="card-body">
             <h5 class="card-title" id="reportAverageSales">0</h5>
           </div>
@@ -104,7 +104,7 @@
   <script>
     function naira(amount) {
   return `₦${amount.toLocaleString('en-NG')}`;
-}
+    }
 
     function loadReportPage() {
      // 2) On "Load Report" => call getDetailedReport()
@@ -113,9 +113,7 @@
       });
     }
 
-
-
-    function getDetailedReport() {
+          async function getDetailedReport() {
       const startDate = document.getElementById("startDate").value;
       const endDate = document.getElementById("endDate").value;
       const type = document.getElementById("typeSelect").value;
@@ -129,23 +127,22 @@
         alert("Please select a valid type.");
         return;
       }
-
-      fetch(endpoint, {
+          if (type === "sales") {
+            try {
+              const res = await fetch(endpoint, {
         method: "GET", 
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`  
         }
-      })
-        .then(res => res.json())
-        .then(data => {
+            });
+            const data = await res.json();
           console.log(data)
           // If no participants or error
           if (data.error) {
             alert(data.error);
             return;
           }
-
           // Show result details
           document.getElementById("InfoSection").style.display = "block";
           document.getElementById("reportType").textContent = "Best Selling Category";
@@ -156,7 +153,7 @@
           const totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
           const averageSales = data.totalSales.total / totalDays;
 
-          // Show summary
+            // Show Cards
           document.getElementById("summaryCards").style.display = "block";
           document.getElementById("totalSales").textContent = naira(data.totalSales.total) || 0;
           document.getElementById("totalSalesQuantity").textContent = data.totalSales.quantity || 0;
@@ -197,13 +194,43 @@
             breakdownBody2.appendChild(row2);
           });
          
-        })
-        .catch(err => {
-          console.error(err);
-          alert("Failed to load report.");
-        });
-        
-    }
+          }
+          catch (e) {
+            console.error(err);
+            alert("Failed to load report.");
+          }
+        }
+
+        else if (type === "incomes") {
+          try {
+            const res = await fetch(endpoint, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+              }
+            });
+            const data = await res.json()
+            console.log(data)
+            document.getElementById("summaryCards").style.display = "block";
+            document.getElementById("incomeHeader0").textContent = data[0]._id;
+            document.getElementById("incomeHeader1").textContent = data[1]._id;
+            document.getElementById("incomeHeader2").textContent = data[2]._id;
+            document.getElementById("totalSales").textContent = naira(data[0].totalIncome) || 0;
+            document.getElementById("totalSalesQuantity").textContent = naira(data[1].totalIncome) || 0;
+            document.getElementById("reportBestAmountVal").textContent = naira(data[2].totalIncome) || 0;
+            document.getElementById("incomeHeader3").textContent = "Total Income for Period";
+            document.getElementById("reportAverageSales").textContent = naira(data[2].totalIncome + data[1].totalIncome + data[0].totalIncome) || 0;
+          }
+          catch (error) {
+
+          }
+        }
+        else if (type === "expenses") {
+          alert("Report is being worked on");
+          console.log("expenses")
+        }
+        }
   </script>
 <script>
     /* Re-init DataTable after dynamic load if needed */

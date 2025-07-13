@@ -40,14 +40,14 @@ const SalesSchema = new Schema({
 
 SalesSchema.statics.getTotal = async function () {
   const result = await this.aggregate([
-    {
-      $group: {
-        _id: null,
-        total: { $sum: { $multiply: ["$amount", "$quantity"] } },
-        quantity: { $sum: "$quantity" },
-      },
-    },
-  ]);
+		{
+			$group: {
+				_id: null,
+				total: { $sum: "$amount" },
+				quantity: { $sum: "$quantity" },
+			},
+		},
+	]);
   return result.length > 0 ? { total: result[0].total, quantity: result[0].quantity } : { total: 0, quantity: 0 };
 };
 

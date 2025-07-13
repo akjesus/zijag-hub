@@ -1,0 +1,24 @@
+{
+    "prettier.vueIndentScriptAndStyle": true,
+    "prettier.useTabs": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSaveMode": "modifications",
+    "editor.formatOnType": true,
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "accessibility.signals.format": {
+        "announcement": "userGesture",
+        "sound": "userGesture"
+    },
+    "notebook.defaultFormatter": "esbenp.prettier-vscode",
+    "notebook.formatOnCellExecution": true,
+    "notebook.formatOnSave.enabled": true,
+    "html.format.contentUnformatted": "",
+    "html.format.indentHandlebars": true,
+    "html.format.indentInnerHtml": true,
+    "html.format.maxPreserveNewLines": 100,
+    "html.format.templating": true
+}
