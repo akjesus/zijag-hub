@@ -5,17 +5,13 @@ const Expenses = require("../models/ExpensesModel");
 exports.getAllExpense = async (req, res)=> {
     try {
         const expenses = await Expenses.find()
-          .sort({ date: -1 })
+          .sort({ createdAt: -1 })
           .populate("createdBy", "firstName lastName")
           .populate("category", "name"); // Populate createdBy with user detail
         if (expenses.length === 0) {
             return res.status(200).json({ message: "No expenses found" });
         }
-        const result = expenses.map((item, index) => ({
-          serialNumber: index + 1,
-          ...item.toObject(),
-        }));
-        return res.status(200).json(result);
+        return res.status(200).json(expenses);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

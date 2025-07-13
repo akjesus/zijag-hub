@@ -44,10 +44,11 @@ SalesSchema.statics.getTotal = async function () {
       $group: {
         _id: null,
         total: { $sum: { $multiply: ["$amount", "$quantity"] } },
+        quantity: { $sum: "$quantity" },
       },
     },
   ]);
-  return result.length > 0 ? result[0].total : 0;
+  return result.length > 0 ? { total: result[0].total, quantity: result[0].quantity } : { total: 0, quantity: 0 };
 };
 
 module.exports = Sales = mongoose.model("Sales", SalesSchema);

@@ -1,4 +1,4 @@
-<!-- pages/students.html -->
+<!-- pages/Sales.html -->
 <div class="container mt-4">
 <h2>View Sales</h2>
 
@@ -185,7 +185,9 @@
 
 <script>
   
-
+   function naira(amount) {
+  return `₦${amount.toLocaleString('en-NG')}`;
+}
 
   document.addEventListener("DOMContentLoaded", function () {
     initDataTable();
@@ -212,14 +214,7 @@
     new bootstrap.Modal(document.getElementById("importCSVModal")).show();
   }
 
-  function numberRowsSerially(tableId) {
-  const table = document.getElementById(tableId);
-  const rows = table.rows;
 
-  for (let i = 1; i < rows.length; i++) {
-    rows[i].cells[0].textContent = i;
-  }
-}
   function initDataTable() {
     function dateToString(date) {
       return new Date(date).toLocaleDateString();
@@ -231,13 +226,20 @@
         dataSrc: ""
       },
       columns: [
-        { data: "serialNumber"},
+        {
+      data: null,
+      render: function(data, type, row, meta) {
+        return meta.row + 1;
+      }
+    },
         { data: "description" },
 
         { data: function(row) {
           return row.category.name;
         }},
-        { data: "amount" },
+        { data: function(row) {
+          return naira(row.amount)
+        } },
         { data: "quantity" },
         { data: function (row) {
           return dateToString(row.createdAt)
@@ -264,9 +266,9 @@
       dom: "Bfrtip",
       buttons: [
         "pageLength",
-        { extend: "csvHtml5", title: "Students_Export" },
-        { extend: "excelHtml5", title: "Students_Export" },
-        { extend: "print", title: "Students List" }
+        { extend: "csvHtml5", title: "Sales_Export" },
+        { extend: "excelHtml5", title: "Sales_Export" },
+        { extend: "print", title: "Sales List" }
       ],
       responsive: true,
       pageLength: 10,

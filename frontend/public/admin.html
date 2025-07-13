@@ -131,10 +131,16 @@
             ><i class="fas fa-file-alt"></i> Manage Inventory</a
           >
           <a
-            href="#view-results"
-            data-page="view-results"
+            href="#reports"
+            data-page="reports"
             onclick="loadPage(this.getAttribute('data-page'))"
-            ><i class="fas fa-chart-line"></i> View Reports</a
+            ><i class="fas fa-chart-pie"></i> Reports</a
+          >
+          <a
+            href="#reports-detail"
+            data-page="reports-detail"
+            onclick="loadPage(this.getAttribute('data-page'))"
+            ><i class="fas fa-chart-line"></i> Reports Details</a
           >
           <a
             href="#users"
@@ -142,12 +148,7 @@
             onclick="loadPage(this.getAttribute('data-page'))"
             ><i class="fas fa-users"></i> Manage Users</a
           >
-          <a
-            href="#reports"
-            data-page="reports"
-            onclick="loadPage(this.getAttribute('data-page'))"
-            ><i class="fas fa-chart-pie"></i> Reports</a
-          >
+          
           <a href="#/admin/logout" id="logout-btn"
             ><i class="fas fa-sign-out-alt"></i> Logout</a
           >
@@ -158,9 +159,7 @@
           class="col-md-10"
           id="main-content"
           style="
-            margin-top: 70px;
-            xheight: 600px;
-            xoverflow: xcroll;
+            margin-top: 70px; 
             padding: 0px;
           "
         >

@@ -4,15 +4,11 @@ const Income = require("../models/IncomeModel");
 
 exports.getAllIncome = async (req, res)=> {
     try {
-        const incomes = await Income.find().sort({ date: -1 }).populate('createdBy', 'firstName lastName').populate('category', 'name'); // Populate createdBy with user details
+        const incomes = await Income.find().sort({ createdAt: -1 }).populate('createdBy', 'firstName lastName').populate('category', 'name'); // Populate createdBy with user details
         if (incomes.length === 0) {
           return res.status(200).json({ message: "No incomes found" });
-        }
-        const result = incomes.map((item, index) => ({
-          serialNumber: index + 1,
-          ...item.toObject(),
-        }));        
-        res.status(200).json(result);
+        }     
+        res.status(200).json(incomes);
 
     } catch (err) {
         res.status(500).json({ error: err.message });

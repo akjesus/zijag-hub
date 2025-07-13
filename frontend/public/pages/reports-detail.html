@@ -1,0 +1,218 @@
+
+<div class="container mt-4">
+  <h2>Detailed Reports</h2>
+
+  <div class="mb-3">
+    <label for="typeSelect" class="form-label">Type:</label>
+    <select id="typeSelect" class="form-select" style="width: 200px; display: inline-block;">
+      <option value="">Select Type</option>
+      <option value="incomes">Income</option>
+      <option value="sales">Sales</option>
+      <option value="expenses">Expenses</option>
+    </select>
+    <!-- Date range -->
+    <label for="startDate" class="form-label ms-3">Start Date:</label>
+    <input type="date" id="startDate" class="form-control" style="width: 200px; display: inline-block;" />
+
+    <label for="endDate" class="form-label ms-3">End Date:</label>
+    <input type="date" id="endDate" class="form-control" style="width: 200px; display: inline-block;" />
+
+    <button id="btnLoadReport" class="btn btn-primary">Load Report</button>
+  </div>
+
+  <!-- Exam Info Section -->
+  <div id="InfoSection" style="display: none;" class="mb-4">
+    <h4>Report Info:</h4>
+    <p><strong>Report Type:</strong> <span id="reportType"></span></p>
+    <p><strong>Item:</strong> <span id="reportTypeName"></span></p>
+    <p><strong>Amount Generated:</strong> <span id="reportBestAmount"></span></p>
+    <p><strong>Number of Sales:</strong> <span id="reportBestCount"></span></p>
+  </div>
+
+  <!-- Summary Cards -->
+  <div id="summaryCards" style="display: none;">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-header">Total Sales</div>
+          <div class="card-body">
+            <h5 class="card-title" id="totalSales">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-header">Total Sales Quantity </div>
+          <div class="card-body">
+            <h5 class="card-title" id="totalSalesQuantity">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-header">Category Sales</div>
+          <div class="card-body">
+            <h5 class="card-title" id="reportBestAmountVal">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+          <div class="card-header">Average Sales Per Day</div>
+          <div class="card-body">
+            <h5 class="card-title" id="reportAverageSales">0</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Selling Items Breakdown Table -->
+  <div id="breakdownSection" style="display: none;">
+    <h4>Selling Items Breakdown:</h4>
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Amount Generated</th>
+        <th>Quantity</th>
+      </tr>
+      </thead>
+      <tbody id="breakdownTbody">
+      <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+  <div id="breakdownSection2" style="display: none;">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Amount Generated</th>
+        <th>Quantity</th>
+      </tr>
+      </thead>
+      <tbody id="breakdownTbody2">
+      <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+  <script>
+    function naira(amount) {
+  return `₦${amount.toLocaleString('en-NG')}`;
+}
+
+    function loadReportPage() {
+     // 2) On "Load Report" => call getDetailedReport()
+      document.getElementById("btnLoadReport").addEventListener("click", function() {
+        getDetailedReport();
+      });
+    }
+
+
+
+    function getDetailedReport() {
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+      const type = document.getElementById("typeSelect").value;
+      if (!startDate || !endDate ) {
+        alert("Please select a date range.");
+        return;
+      }
+
+      let endpoint = API_URL + `${type}`;
+      if(type === "incomes") {
+        endpoint += `/report?startDate=${startDate}&endDate=${endDate}`;
+      } else if(type === "sales") {
+        endpoint += `/selling-items?startDate=${startDate}&endDate=${endDate}`;
+      } else if(type === "expenses") {
+        endpoint += `/report?startDate=${startDate}&endDate=${endDate}`;
+      } else {
+        alert("Please select a valid type.");
+        return;
+      }
+
+      fetch(endpoint, {
+        method: "GET", 
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`  
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log(data)
+          // If no participants or error
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          // Show result details
+          document.getElementById("InfoSection").style.display = "block";
+          document.getElementById("reportType").textContent = "Best Selling Category";
+          document.getElementById("reportTypeName").textContent = data.bestSellingCategory;
+          document.getElementById("reportBestAmount").textContent = naira(data.categoryTotalsales);
+          document.getElementById("reportBestCount").textContent = data.categorySalesCount;
+          //get average sales per day
+          const totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+          const averageSales = data.totalSales.total / totalDays;
+
+          // Show summary
+          document.getElementById("summaryCards").style.display = "block";
+          document.getElementById("totalSales").textContent = naira(data.totalSales.total) || 0;
+          document.getElementById("totalSalesQuantity").textContent = data.totalSales.quantity || 0;
+          document.getElementById("reportBestAmountVal").textContent = naira(data.categoryTotalsales) || 0;
+          document.getElementById("reportAverageSales").textContent = naira(averageSales);
+
+
+          document.getElementById("breakdownSection").style.display = "block";
+          const breakdownBody = document.getElementById("breakdownTbody");
+          breakdownBody.innerHTML = "<b>Best Items</b>";
+          (data.best || []).forEach(d => {
+            let row = document.createElement("tr");
+            let tdName = document.createElement("td");
+            tdName.textContent = d._id;
+            let tdCount = document.createElement("td");
+            tdCount.textContent = naira(d.totalAmount);
+            let tdQty = document.createElement("td");
+            tdQty.textContent = d.count;
+            row.appendChild(tdName);
+            row.appendChild(tdCount);
+            row.appendChild(tdQty);
+            breakdownBody.appendChild(row);
+          });
+          document.getElementById("breakdownSection2").style.display = "block";
+          const breakdownBody2 = document.getElementById("breakdownTbody2");
+          breakdownBody2.innerHTML = "<b>Worst Items</b>";
+          (data.worst || []).forEach(d => {
+            let row2 = document.createElement("tr");
+            let tdName2 = document.createElement("td");
+            tdName2.textContent = d._id;
+            let tdCount2 = document.createElement("td");
+            tdCount2.textContent = naira(d.totalAmount);
+            let tdQty = document.createElement("td");
+            tdQty.textContent = d.count;
+            row2.appendChild(tdName2);
+            row2.appendChild(tdCount2);
+            row2.appendChild(tdQty);
+            breakdownBody2.appendChild(row2);
+          });
+         
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Failed to load report.");
+        });
+        
+    }
+  </script>
+<script>
+    /* Re-init DataTable after dynamic load if needed */
+    setTimeout(loadReportPage(), 100);
+</script>
+  

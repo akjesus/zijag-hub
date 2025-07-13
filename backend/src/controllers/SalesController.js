@@ -1,94 +1,168 @@
 const Sales = require("../models/SalesModel");
+const Category = require("../models/CategoryModel");
 
-
-
-exports.getAllSales = async (req, res)=> {
-    try {
-        const sales = await Sales.find().sort({ date: -1 }).populate('createdBy', 'username').populate('category', 'name'); // Populate createdBy with user details
-        if (sales.length === 0) {
-          return res.status(200).json({ message: "No sales found" });
-        }
-        const result = sales.map((item, index) => ({
-          serialNumber: index + 1,
-          ...item.toObject(),
-        }));        
-        res.status(200).json(result);   
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+exports.getAllSales = async (req, res) => {
+  try {
+    const sales = await Sales.find()
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "username")
+      .populate("category", "name"); // Populate createdBy with user details
+    if (sales.length === 0) {
+      return res.status(200).json({ message: "No sales found" });
     }
-}
+
+    res.status(200).json(sales);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.createSales = async (req, res) => {
-    try {
-        const user = req.user; 
-       if (!user) {
-            return res.status(401).json({ message: "Unauthorized" });
-       }
-        const { title, category, amount, description, source } = req.body;
-        if (!title || !category || !amount) {
-            return res.status(400).json({ message: "Title, category, and amount are required" });
-        }
-        const newSales = new Sales({
-            title,
-            description,
-            category,
-            amount,
-            source,
-            createdBy: req.user.id // Assuming req.user is set by authentication middleware
-        });
-       await newSales.save();
-        res.status(201).json(newSales );
-    } catch (error) {
-        console.log("Error creating sales:", error);
-        res.status(500).json({ error: error.message });
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-}
+    const { title, category, amount, description, source } = req.body;
+    if (!title || !category || !amount) {
+      return res
+        .status(400)
+        .json({ message: "Title, category, and amount are required" });
+    }
+    const newSales = new Sales({
+      title,
+      description,
+      category,
+      amount,
+      source,
+      createdBy: req.user.id, // Assuming req.user is set by authentication middleware
+    });
+    await newSales.save();
+    res.status(201).json(newSales);
+  } catch (error) {
+    console.log("Error creating sales:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 exports.findSalesById = async (req, res) => {
-    const { id } = req.params;
-    if (!id) {
-        return res.status(400).json({ message: "sales ID is required" });
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: "sales ID is required" });
+  }
+  try {
+    const sales = await Sales.findById(req.params.id);
+    if (!sales) {
+      return res.status(404).json({ message: "sales not found" });
     }
-    try {
-        const sales = await Sales.findById(req.params.id);
-        if (!sales) {
-            return res.status(404).json({ message: "sales not found" });
-        }
-        res.status(200).json(sales);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}   
+    res.status(200).json(sales);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 exports.deleteSales = async (req, res) => {
-    const { id } = req.params;
-    if (!id) {
-        return res.status(400).json({ message: "sales ID is required" });
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: "sales ID is required" });
+  }
+  try {
+    const sales = await Sales.findById(id);
+    if (!sales) {
+      return res.status(404).json({ message: "sales not found" });
     }
-    try {
-        const sales = await Sales.findById(id);
-        if (!sales) {
-            return res.status(404).json({ message: "sales not found" });
-        }
-        await Sales.findByIdAndDelete(id);
-        res.status(200).json({ message: "sales deleted"  });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
+    await Sales.findByIdAndDelete(id);
+    res.status(200).json({ message: "sales deleted" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 exports.updateSales = async (req, res) => {
-    const { id } = req.params;
-    if (!id) {
-        return res.status(400).json({ message: "sales ID is required" });
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: "sales ID is required" });
+  }
+  try {
+    const sales = await Sales.findByIdAndUpdate(id, req.body, { new: true });
+    if (!sales) {
+      return res.status(404).json({ message: "sales not found" });
     }
-    try {
-        const sales = await Sales.findByIdAndUpdate(id, req.body, { new: true });
-        if (!sales) {
-            return res.status(404).json({ message: "sales not found" });
-        }
-        res.status(200).json(sales);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
+    res.status(200).json(sales);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.sellingItems = async (req, res) => {
+  const { startDate, endDate } = req.query;
+  if (!startDate || !endDate) {
+    return res
+      .status(400)
+      .json({ message: "Start date and end date are required" });
+  }
+  try {
+    const best = await Sales.aggregate([
+      {
+        $group: {
+          _id: "$description",
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalAmount: -1 },
+      },
+      {
+        $limit: 3,
+      },
+    ]);
+    const worst = await Sales.aggregate([
+      {
+        $group: {
+          _id: "$description",
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalAmount: 1 },
+      },
+      {
+        $limit: 3,
+      },
+    ]);
+    const totalSales = await Sales.getTotal();
+    const cat = await Sales.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalAmount: -1 },
+      },
+      {
+        $limit: 3,
+      },
+    ]);
+    const bestSellingCat = await Category.findById(cat[0]._id);
+
+    //calculate sales from best selling category
+    
+    res.status(200).json({
+      best,
+      worst,
+      totalSales,
+      bestSellingCategory: bestSellingCat.name,
+      categoryTotalsales: cat[0].totalAmount,
+      categorySalesCount: cat[0].count
+    });
+  } catch (error) {
+    console.log("Error fetching best selling items:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+

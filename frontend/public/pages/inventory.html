@@ -24,7 +24,7 @@
   >
     <thead>
       <tr>
-        <th>ID</th>
+        <th>S/N</th>
         <th>Item Name</th>
         <th>Description</th>
         <th>Category</th>
@@ -194,7 +194,7 @@
             <div class="mb-3">
               <label for="source" class="form-label">Source</label>
               <select id="source" class="form-select" required>
-                  <option value ="Cash" default selected> Cash</option>
+                  <option value ="Cash"> Cash</option>
                   <option value ="Bank"> Bank</option>
                   <option value ="POS"> POS</option>
                   <option value ="Mobile Transfers"> Mobile Transfers</option>
@@ -281,7 +281,9 @@
   
   <script>
   
-
+   function naira(amount) {
+  return `₦${amount.toLocaleString('en-NG')}`;
+}
   
     document.addEventListener("DOMContentLoaded", function () {
       initDataTable();
@@ -304,9 +306,7 @@
     }
   
     function startimportCSV() {
-      console.log("Starting CSV Import");
       document.getElementById("csvFile").value = "";
-      // loadDropCategory(); // load Categories for import
       new bootstrap.Modal(document.getElementById("importCSVModal")).show();
     }
     function loadDropCategory() {
@@ -333,12 +333,21 @@
           dataSrc: ""
         },
         columns: [
-          { data: "serialNumber" },
+          {
+      data: null,
+      render: function(data, type, row, meta) {
+        return meta.row + 1;
+      }
+    },
           { data: "name" },
           { data: "description" },
           { data: "category.name" },
-          { data: "costPrice" },
-          { data: "sellingPrice" },
+          { data: function(row) {
+            return naira(row.costPrice)
+          } },
+          { data: function(row) {
+            return naira(row.sellingPrice)
+          }},
           { data: function(row) {
             if(row.quantity <= 5) 
             return `<b> <p style="color:red"> ${row.quantity}</p> </b>`
@@ -559,14 +568,15 @@ try {
     headers: { 'Authorization': `Bearer ${token}` } 
   })
   const inventory = await res.json();
-  if (!inventory || !inventory._id) {
+  if (!inventory || !inventory._id) 
+  {
     alert("Inventory item not found.");
     return;
+    
   }
   document.getElementById("inventoryId").value = inventory._id;
   document.getElementById("sellingItemName").value = inventory.name;
-  document.getElementById("sellingItemQuantity").value = 1; // Default to selling 1 item
-  const source = document.getElementById("source").value; 
+  document.getElementById("sellingItemQuantity").value = 1; 
   document.getElementById("sellinventoryModalLabel").textContent = "Sell Inventory";
   new bootstrap.Modal(document.getElementById("sellInventoryModal")).show();
 
@@ -587,17 +597,16 @@ try {
   };
 }
 catch (error) {
-  alert("Failed to sell inventory item.");
-  console.error("Sell Item Error:", error);
+  alert("Failed to sell inventory item.", error);
   return;
 }
 }
 
-async function sellInventoryItem(id, quantity, source) {  
+async function sellInventoryItem(id, quantity) {  
   const payload = {
     quantity: quantity,
-    source: source || "Cash" // Default to Cash if not provided
-  };  
+    source: document.getElementById("source").value // Default to Cash if not provided
+  };
   try {
     const res = await fetch(API_URL + "inventories/sell/" + id, {
                       method: "POST",
@@ -622,8 +631,7 @@ async function sellInventoryItem(id, quantity, source) {
   }  
 
   catch(error) {
-    alert("Failed to prepare sell request.");
-    console.error("Sell Inventory Error:", error);
+    alert("Failed to prepare sell request.", error);
     return;
   }
   

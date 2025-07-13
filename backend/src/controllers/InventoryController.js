@@ -13,12 +13,8 @@ exports.getAllInventories= async (req, res)=> {
           .populate("category", "name"); // Populate createdBy with user details
         if (inventory.length === 0) {
           return res.status(200).json({ message: "No inventory found" });
-        }
-        const result = inventory.map((item, index) => ({
-          serialNumber: index + 1,
-          ...item.toObject(),
-        }));        
-        res.status(200).json(result);
+        }      
+        res.status(200).json(inventory);
 
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -149,6 +145,10 @@ exports.getInventoryByDateRange = async (req, res) => {
 exports.sellInventoryItem = async (req, res) => {
     const { id } = req.params;
     const { quantity, source } = req.body;
+    if (!quantity || quantity <= 0) {
+        return res.status(400).json({ message: "Invalid quantity" });
+    }
+    console.log("Selling inventory item:", id, "Quantity:", quantity, "Source:", source);
     try {
         const inventory = await Inventory.findById(id);
         if (!inventory) {
@@ -164,13 +164,13 @@ exports.sellInventoryItem = async (req, res) => {
             category: inventory.category,
             amount: inventory.sellingPrice * quantity,
             source: source,
-            description: `Sold ${quantity} pcs of "<b>${inventory.name}</b>"`,
+            description: `${quantity} pcs of "${inventory.name}"`,
             createdBy: req.user.id
         });
         await Sales.create({
-            description: `Sold ${quantity} pcs of "<b>${inventory.name}</b>"`,
+            description: `${quantity} pcs of "${inventory.name}"`,
             category: inventory.category,
-            amount: inventory.sellingPrice * quantity,
+            amount: inventory.sellingPrice,
             quantity: quantity,
             source: source,
             createdBy: req.user.id
