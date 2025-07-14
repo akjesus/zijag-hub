@@ -9,6 +9,9 @@ document.getElementById("logout-btn").addEventListener("click", function () {
   logoutAdmin();
 });
 
+ function naira(amount) {
+		return `₦${amount.toLocaleString("en-NG")}`;
+ }
 function logoutAdmin() {
   localStorage.removeItem("token"); // Remove stored token
   window.location.href = "/admin-login.html"; // Redirect to login
@@ -30,23 +33,25 @@ function fetchAdminDashboard() {
   })
     .then((response) => response.json())
     .then((data) => {
-      document.getElementById("income-total").innerHTML =  data.income ? `N${data.income}` + " Received" : "No Income Yet";
+      console.log(data);
+      document.getElementById("income-total").innerHTML =  data.income ? `${naira(data.income)}` + " Received" : "No Income Yet";
       document.getElementById("expense-total").innerHTML = data.expense
-        ? `N${data.expense}` + " Paid"
+        ? `${naira(data.expense)}` + " Paid"
         : "No Expenses Yet";
       // document.getElementById("costPrice").innerHTML = data.costPriceTotal
       //   ? `N${data.costPriceTotal}` + " Cost Price Total"
       //   : "No Cost Price Data";
       document.getElementById("sellingPrice").innerText = data.sellingPriceTotal
-        ? `N${data.sellingPriceTotal}`
+        ? `${naira(data.sellingPriceTotal)}`
         : "No Selling Price Data";
         //User count
       document.getElementById("user-count").innerHTML = data.userCount
         ? `${data.userCount} Users`
         : "No User Data";
       document.getElementById("total-sales").innerHTML = data.totalSales
-        ? `N${data.totalSales.total}` + " Total Sales"
+        ? `${naira(data.totalSales.total)}` + " Total Sales"
         : "No Sales Data";
+      document.getElementById("username").innerHTML = data.username || "staff";
     })
     .catch((error) => console.error("Error loading dashboard:", error));
 }

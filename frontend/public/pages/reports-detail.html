@@ -272,6 +272,46 @@
     function naira(amount) {
   return `₦${amount.toLocaleString('en-NG')}`;
     }
+
+  async function customAlert(message, options = {}) {
+    return new Promise((resolve) => {
+      const customAlert = document.getElementById('custom-alert');
+      const customAlertMessage = document.getElementById('custom-alert-message');
+      const customAlertOk = document.getElementById('custom-alert-ok');
+      const customAlertCancel = document.getElementById('custom-alert-cancel');
+
+      customAlertMessage.innerText = message;
+
+      if (options.confirm) {
+        customAlertCancel.style.display = 'inline-block';
+      } else {
+        customAlertCancel.style.display = 'none';
+      }
+
+      customAlert.style.display = 'block';
+      setTimeout(() => {
+        customAlert.classList.add('show');
+      }, 10);
+
+      customAlertOk.addEventListener('click', () => {
+        customAlert.classList.remove('show');
+        setTimeout(() => {
+          customAlert.style.display = 'none';
+          resolve(true);
+        }, 500);
+      });
+
+      customAlertCancel.addEventListener('click', () => {
+        customAlert.classList.remove('show');
+        setTimeout(() => {
+          customAlert.style.display = 'none';
+          resolve(false);
+        }, 500);
+      });
+    });
+  }
+
+
     const select = document.getElementById('typeSelect');
       const button = document.getElementById('btnLoadReport');
 
@@ -326,13 +366,13 @@
       const endDate = document.getElementById("endDate").value;
       const type = document.getElementById("typeSelect").value;
       if (!startDate || !endDate ) {
-        alert("Please select a date range.");
+        customAlert("Please select a date range.");
         return;
       }
 
       let endpoint = API_URL + "reports/" + `${type}` + `/?startDate=${startDate}&endDate=${endDate}`;
       if(!type) {
-        alert("Please select a valid type.");
+        customAlert("Please select a valid type.");
         return;
       }
           if (type === "sales") {
@@ -348,7 +388,7 @@
           console.log(data)
           // If no participants or error
           if (data.error) {
-            alert(data.error);
+            customAlert(data.error);
             return;
           }
 
@@ -419,7 +459,7 @@
           }
           catch (err) {
             console.log(err);
-            alert("Failed to load report.");
+            customAlert("Failed to load report.");
           }
         }
         else if (type === "incomes") {
@@ -433,7 +473,7 @@
             });
             const data = await res.json()
             if (data.error) {
-              alert(data.error);
+              customAlert(data.error);
               return;
             }
             console.log(data)
@@ -458,7 +498,7 @@
             document.getElementById("totalIncomeSources").textContent = naira(totalAmount) || 0;
           }
           catch (error) {
-            alert(error)
+            customAlert(error)
             return
           }
         }
@@ -475,7 +515,7 @@
             const data = await res.json()
             console.log(data)
             if(data.error) {
-              alert(data.error)
+              customAlert(data.error)
               return
             }
              //remove elements from other reports
@@ -495,7 +535,7 @@
             document.getElementById("expensesHeader3Val").textContent = totalAmountgen || 0;
           }
           catch(error) {
-              alert(error);
+              customAlert(error);
               return
           }
         }
@@ -510,7 +550,7 @@
             });
             const data = await res.json();
             if (data.error) {
-              alert(data.error);
+              customAlert(data.error);
               return;
             }
             //remove elements from other reports
@@ -534,7 +574,7 @@
             });
           }
           catch(error) {
-            alert(error)
+            customAlert(error)
             return
           }
         }

@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const adminController = require("../controllers/AdminController");
-const { verifyAdmin } = require("../middleware/authMiddleware");
+const { getDashboardStats } = require("../controllers/AdminController");
+const {  verifyToken } = require("../controllers/AuthController");
 
 // Admin Dashboard Data (Protected Route)
-router.get("/dashboard", verifyAdmin, adminController.getDashboardStats);
+router.get("/dashboard", verifyToken, getDashboardStats);
 
 module.exports = router;

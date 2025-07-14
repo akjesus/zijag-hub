@@ -32,7 +32,8 @@ exports.getDashboardStats = async (req, res) => {
     data.totalSales = totalSales;
 
     res.json({... data,
-      business_name:  "Zijag Hub"
+      business_name: "Zijag Hub",
+      username: req.user.username,
     });
   } catch (err) {
     console.error("Dashboard Stats Error:", err);

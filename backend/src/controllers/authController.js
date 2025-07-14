@@ -30,7 +30,7 @@ exports.login = async (req, res) => {
       }
   
       // Generate JWT token
-      const token = jwt.sign({ id: user._id, role: user.role }, SECRET_KEY, { expiresIn: "24h" });
+      const token = jwt.sign({ id: user._id, role: user.role, username: user.username }, SECRET_KEY, { expiresIn: "24h" });
   
       res.json({ message: "Login successful", token });
     } catch (err) {
@@ -79,7 +79,7 @@ exports.logout = (req, res) => {
   };
 
   
-exports.verifyToken = (req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
       const token = req.headers.authorization?.split(" ")[1];
       
       if (!token) {
@@ -89,19 +89,20 @@ exports.verifyToken = (req, res, next) => {
           if (err) {
               return res.status(403).json({ error: "Invalid token" });
           }
-          req.user = user;
+        req.user = user;
           next();
       });
   };
 
 exports.makeAdmin = async (req, res) => {
     try {
-      const { userId } = req.body;
-      if (!userId) {
+      const { id } = req.params;
+      console.log(id)
+      if (!id) {
         return res.status(400).json({ error: "User ID is required" });
       }
   
-      const user = await User.findById(userId);
+      const user = await User.findById(id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }

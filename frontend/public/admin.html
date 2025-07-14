@@ -82,16 +82,159 @@
       .container {
         max-width: 95% !important;
       }
+      .username {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+  text-transform: capitalize;
+}
+
+/* Optional: Add a hover effect */
+.username:hover {
+  color: #666;
+  cursor: pointer;
+}
+
+/* Optional: Add a style for the username when it's linked */
+.username a {
+  text-decoration: none;
+  color: #337ab7;
+}
+
+.username a:hover {
+  color: #23527c;
+}
+.custom-alert {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.custom-alert.show {
+  display: block;
+  opacity: 1;
+}
+
+.custom-alert-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  background-color: #fff;
+  padding: 40px;
+  width: 500px;
+  max-width: 90%;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+}
+
+.custom-alert.show .custom-alert-content {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.custom-alert-content button {
+  background-color: #4CAF50;
+  color: #fff;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.custom-alert-content button:hover {
+  background-color: #3e8e41;
+}
+
+#custom-alert-message {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+#custom-alert-cancel {
+  background-color: #f44336;
+}
+
+#custom-alert-cancel:hover {
+  background-color: #e91e63;
+}
+
+
+
     </style>
+    <script>
+       async function customAlert(message, options = {}) {
+          return new Promise((resolve) => {
+            const customAlert = document.getElementById('custom-alert');
+            const customAlertMessage = document.getElementById('custom-alert-message');
+            const customAlertOk = document.getElementById('custom-alert-ok');
+            const customAlertCancel = document.getElementById('custom-alert-cancel');
+
+            customAlertMessage.innerText = message;
+
+            if (options.confirm) {
+              customAlertCancel.style.display = 'inline-block';
+            } else {
+              customAlertCancel.style.display = 'none';
+            }
+
+            customAlert.style.display = 'block';
+            setTimeout(() => {
+              customAlert.classList.add('show');
+            }, 10);
+
+            customAlertOk.addEventListener('click', () => {
+              customAlert.classList.remove('show');
+              setTimeout(() => {
+                customAlert.style.display = 'none';
+                resolve(true);
+              }, 500);
+            });
+
+            customAlertCancel.addEventListener('click', () => {
+              customAlert.classList.remove('show');
+              setTimeout(() => {
+                customAlert.style.display = 'none';
+                resolve(false);
+              }, 500);
+            });
+          });
+        }
+      async function logout() {
+        const proceed = await customAlert('Are you sure you want to logout?', { confirm: true });
+        if (!proceed) return
+
+          localStorage.removeItem("token"); // Remove stored token
+          window.location.href = "/admin-login.html"; // Redirect to login
+          console.log(process.env)
+         
+      }
+
+    </script>
   </head>
   <body>
+    <div id="custom-alert" class="custom-alert">
+      <div class="custom-alert-content">
+        <p id="custom-alert-message"></p>
+        <button id="custom-alert-ok">OK</button>
+        <button id="custom-alert-cancel" style="display: none;">Cancel</button>
+      </div>
+    </div>
+
     <div class="top-nav">
       <div class="logo">
         <img src="/assets/logo.png" alt="Logo" />
         <h5>Zijag Hub</h5>
       </div>
       <div>
-        <i class="fas fa-user"></i>
+        <span id="username" class ="username" onclick="logout()"> <i class="fas fa-user"></i>  </span>
         <img src="/assets/logo.png" alt="Profile" class="profile-img" />
       </div>
     </div>
