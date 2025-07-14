@@ -15,7 +15,6 @@ document.getElementById("logout-btn").addEventListener("click", function () {
 function logoutAdmin() {
   localStorage.removeItem("token"); // Remove stored token
   window.location.href = "/admin-login.html"; // Redirect to login
-  console.log(process.env);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -33,7 +32,6 @@ function fetchAdminDashboard() {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
       document.getElementById("income-total").innerHTML =  data.income ? `${naira(data.income)}` + " Received" : "No Income Yet";
       document.getElementById("expense-total").innerHTML = data.expense
         ? `${naira(data.expense)}` + " Paid"

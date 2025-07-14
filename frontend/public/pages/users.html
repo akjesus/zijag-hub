@@ -37,7 +37,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="hidden" id="UserId" />
+            <input type="hidden" id="userId" />
             
             <!-- First Name -->
             <div class="mb-3">
@@ -156,7 +156,12 @@
           dataSrc: ""
         },
         columns: [
-          { data: "serialNumber" },
+           {
+            data: null,
+            render: function (data, type, row, meta) {
+              return meta.row + 1;
+            }
+          },
           { data: "role" },
           { data: "firstName" },
           { data: "lastName" },
@@ -166,7 +171,7 @@
             data: null,
             render: function (row) {
               return `
-                <button class="btn btn-sm btn-primary me-1" onclick="editUser(${row.id})">Edit</button>
+                <button class="btn btn-sm btn-primary me-1" onclick="editUser(${"'" + row._id + "'"})">Edit</button>
                 <button class="btn btn-sm btn-${row.role ==="Admin"? "success" : "warning"}" onclick="makeAdmin(${"'"+ row._id + "'"})">${row.role ==="Admin"? "Admin" : "Make Admin"}</button>
               `;
             },
@@ -204,7 +209,7 @@
       fetch(API_URL + "auth/" + id)
         .then(res => res.json())
         .then(user => {
-          document.getElementById("userId").value = user.id;
+          document.getElementById("userId").value = user._id;
           document.getElementById("userFirstName").value = user.firstName || "";
           document.getElementById("userLastName").value = user.lastName || "";
           document.getElementById("userEmail").value = user.email || "";
@@ -215,7 +220,7 @@
           document.getElementById("userModalLabel").textContent = "Edit User";
           new bootstrap.Modal(document.getElementById("userModal")).show();
         })
-        .catch(() => customAlert("Failed to fetch User info."));
+        .catch((error) => customAlert(error));
     }
 
     function saveUser() {
@@ -232,7 +237,7 @@
       if (id) {
         // Update
         fetch(API_URL + "auth/" + id, {
-          method: "PUT",
+          method: "PATCH",
          headers: {
             "Content-Type": "application/json",
             'Authorization': `Bearer ${token}`,
@@ -241,6 +246,10 @@
         })
           .then(res => res.json())
           .then(data => {
+            if(data.error) {
+              customAlert(data.error);
+              return;
+            }
             bootstrap.Modal.getInstance(document.getElementById("userModal")).hide();
             customAlert(data.message || "User updated successfully.");
             userTable.ajax.reload(null, false);

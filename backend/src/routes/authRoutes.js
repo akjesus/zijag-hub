@@ -9,9 +9,13 @@ const {
 	isAdmin,
 	verifyToken,
 	makeAdmin,
+	findUser,
+	updateUser,
 } = require("../controllers/AuthController");
 
 router.get("/", getAllUsers);
+router.get("/:id", findUser);
+router.patch("/:id", updateUser);
 router.post("/login", login);
 router.post("/register", verifyToken, isAdmin, createUser); // Only for initial setup
 router.patch("/make-admin/:id", verifyToken, isAdmin, makeAdmin); // Only for initial setup

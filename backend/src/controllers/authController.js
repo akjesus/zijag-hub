@@ -127,14 +127,57 @@ exports.isAdmin = (req, res, next) => {
 exports.getAllUsers = async (req, res) => {
     try {
       const users = await User.find({}, "-password"); // Exclude password field
-      const result = users.map((item, index) => ({
-        serialNumber: index + 1,
-        ...item.toObject(),
-      }));
-      return res.status(200).json(result);
+      return res.status(200).json(users);
     } catch (err) {
       console.error("Error fetching users:", err);
       res.status(500).json({ error: err.message });
     }
   };
 
+exports.findUser = async (req, res) => {
+  const { id } = req.params;
+  if(!id) return res.status(400).json({ error: "User ID Required" });
+  try {
+    const user = await User.findById(id); // Exclude password field
+     if (!user) return res.status(400).json({ error: "No User found" });
+		return res.status(200).json(user);
+	} catch (err) {
+		console.error("Error fetching user:", err);
+		res.status(500).json({ error: err.message });
+	}
+}
+
+exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { firstName,
+    lastName,
+    email,
+    username,
+    password } = req.body;
+  if (!firstName || !lastName || !email || !id || !username) {
+    return res.status(400).json({error: " Invalid Data!"})
+  }
+  try {
+    const body = {
+			firstName,
+			lastName,
+			email,
+			username,
+		};
+    
+    if (password && password !=="") {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      body.password = hashedPassword;
+    }
+        const user = await User.findByIdAndUpdate(id, body, {
+          new: true,
+        });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
