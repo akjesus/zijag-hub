@@ -126,36 +126,69 @@ exports.getExamDetailedReport = async (req, res) => {
 
 
 exports.getSummaryReport = async (req, res) => {
-  //FETCH income, expenses, and inventory cost/selling price from mongoDB by date range
-  try {
-    if (!req.body.startDate || !req.body.endDate) {
-      return res.status(400).json({ error: "startDate and endDate query parameters are required" });
-    }
-    const { startDate, endDate } = req.body;
-    const income = await Income.getTotal({
-      createdAt: {
-        $gte: startDate,
-        $lte: endDate,
-      },
-    });
-    const expense = await Expense.getTotal({
-      createdAt: {
-        $gte: startDate,
-        $lte: endDate,
-      },
-    });
-    const inventory = await Inventory.getTotal({
-      createdAt: {
-        $gte: startDate,
-        $lte: endDate,
-      },
-    });
+  const { startDate, endDate } = req.query;
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+	end.setHours(23, 59, 59, 999);
+  const [incomeData, expenseData] = await Promise.all([
+		Income.aggregate([
+			{
+				$match: {
+					createdAt: { $gte: start, $lte: end },
+				},
+			},
+			{
+				$group: {
+					_id: {
+						$dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+					},
+					income: { $sum: "$amount" },
+				},
+			},
+		]),
+		Expense.aggregate([
+			{
+				$match: {
+					createdAt: { $gte: start, $lte: end },
+				},
+			},
+			{
+				$group: {
+					_id: {
+						$dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+					},
+					expense: { $sum: "$amount" },
+				},
+			},
+		]),
+	]);
 
-    res.json({ income, expense, inventory  });
-  } catch (err) {
-    console.error("Summary Report Error:", err);
-    res.status(500).json({ error: err.message });
-  }
+	// Merge the income and expense results by date
+	const resultMap = {};
+
+	incomeData.forEach((item) => {
+		resultMap[item._id] = { date: item._id, income: item.income, expense: 0 };
+	});
+
+	expenseData.forEach((item) => {
+		if (resultMap[item._id]) {
+			resultMap[item._id].expense = item.expense;
+		} else {
+			resultMap[item._id] = {
+				date: item._id,
+				income: 0,
+				expense: item.expense,
+			};
+		}
+	});
+
+	// Sort by date
+	const mergedResults = Object.values(resultMap).sort(
+		(a, b) => new Date(a.date) - new Date(b.date)
+  );
+  if (!mergedResults.length)
+    return res.status(404).json({ error: "No data for this date range" })
+	return res.status(200).json(mergedResults);
 };
 
 exports.salesReport = async (req, res) => {
@@ -231,7 +264,6 @@ exports.salesReport = async (req, res) => {
 				$limit: 3,
 			},
     ]);
-    console.log(cat)
     if (!cat.length) {
       return res.status(404).json({ error: "No data for this date range" });
     }
@@ -259,7 +291,6 @@ exports.incomeReport = async (req, res) => {
   const start = new Date(startDate);
 	const end = new Date(endDate);
 	end.setHours(23, 59, 59, 999);
-  console.log(new Date(startDate), new Date(endDate));
   if (!startDate || !endDate) {
     return res
       .status(400)
@@ -284,7 +315,9 @@ exports.incomeReport = async (req, res) => {
 			$limit: 3,
 		},
 	]);
-
+if (!result.length) {
+	return res.status(404).json({ error: "No data for this date range" });
+}
 
 return res.json(result);
 
@@ -292,6 +325,38 @@ return res.json(result);
 
 }
 exports.expenseReport = async(req, res)=> {
-  console.log(req.query)
-  return res.json({message: "Route Works"});
+ const { startDate, endDate } = req.query;
+ const start = new Date(startDate);
+ const end = new Date(endDate);
+ end.setHours(23, 59, 59, 999);
+ console.log(startDate, endDate);
+ if (!startDate || !endDate) {
+		return res
+			.status(400)
+			.json({ message: "Start date and end date are required" });
+ }
+ const result = await Expense.aggregate([
+		{
+			$match: {
+				createdAt: { $gte: start, $lte: end },
+			},
+		},
+
+		{
+			$group: {
+				_id: "$source",
+				totalExpenses: {
+					$sum: "$amount",
+				},
+			},
+		},
+		{
+			$limit: 3,
+		},
+ ]);
+if (!result.length) {
+	return res.status(404).json({ error: "No data for this date range" });
+}
+ return res.json(result);
+
 }

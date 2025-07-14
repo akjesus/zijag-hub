@@ -2,6 +2,7 @@
 <div class="container mt-4">
   <h2>Detailed Reports</h2>
 
+  <!-- Select Type Selection-->
   <div class="mb-3">
     <label for="typeSelect" class="form-label">Type:</label>
     <select id="typeSelect" class="form-select" style="width: 200px; display: inline-block;">
@@ -9,6 +10,7 @@
       <option value="incomes">Income</option>
       <option value="sales">Sales</option>
       <option value="expenses">Expenses</option>
+      <option value="summary">Summary</option>
     </select>
     <!-- Date range -->
     <label for="startDate" class="form-label ms-3">Start Date:</label>
@@ -17,34 +19,56 @@
     <label for="endDate" class="form-label ms-3">End Date:</label>
     <input type="date" id="endDate" class="form-control" style="width: 200px; display: inline-block;" />
 
-    <button id="btnLoadReport" class="btn btn-primary">Load Report</button>
+    <button id="btnLoadReport" class="btn btn-primary" disabled>Load Report</button>
   </div>
 
   <!-- Exam Info Section -->
-  <div id="InfoSection" style="display: none;" class="mb-4">
+  <div id="incomeInfoSection" style="display: none;" class="mb-4">
+    <h4>Report Info: </h4>
+    <p><strong>Report Type:</strong> <span id="reportType">Top 3 Income Sources</span></p>
+    <p><strong>Item:</strong> <span> Income</span></p>
+    <p><strong>Amount Generated:</strong> <span id="incomeTotalGenerated"></span></p>
+  </div>
+
+  <div id="summaryInfoSection" style="display: none;" class="mb-4">
     <h4>Report Info:</h4>
     <p><strong>Report Type:</strong> <span id="reportType"></span></p>
     <p><strong>Item:</strong> <span id="reportTypeName"></span></p>
-    <p><strong>Amount Generated:</strong> <span id="reportBestAmount"></span></p>
-    <p id = "reportBestCountItem"><strong>Number of Items:</strong> <span id="reportBestCount"></span></p>
+    <p id="incomeItem"><strong>Amount Generated:</strong> <span id="reportBestAmount"></span></p>
+    <p id="reportBestCountItem"><strong>Number of Items:</strong> <span id="reportBestCount"></span></p>
+  </div>
+
+  <div id="expensesInfoSection" style="display: none;" class="mb-4">
+    <h4>Report Info:</h4>
+    <p><strong>Report Type:</strong> <span> Top 3 Expenses Sources</span></p>
+    <p><strong>Item:</strong> <span>Expenses</span></p>
+    <p id="incomeItem"><strong>Amount Generated:</strong> <span id="expensesBestAmount"></span></p>
+  </div>
+
+  <div id="salesInfoSection" style="display: none;" class="mb-4">
+    <h4>Report Info:</h4>
+    <p><strong>Report Type:</strong> <span>Best / Worst Selling Items</span></p>
+    <p><strong>Best Selling Category:</strong> <span id="bestSellingCat"></span></p>
+    <p><strong>Amount Generated:</strong> <span id="categoryTotalsales"></span></p>
+    <p><strong>Number of Items:</strong> <span id="categorySalesCount"></span></p>
   </div>
 
   <!-- Summary Cards -->
-  <div id="summaryCards" style="display: none;">
+  <div id="incomeSummaryCards" style="display: none;">
     <div class="row">
       <div class="col-md-3">
         <div class="card text-white bg-primary mb-3">
-          <div class="card-header" id="incomeHeader0">Total Sales</div>
+          <div class="card-header" id="incomeHeader0">Total Income</div>
           <div class="card-body">
-            <h5 class="card-title" id="totalSales">0</h5>
+            <h5 class="card-title" id="incomeHeader0Val">0</h5>
           </div>
         </div>
       </div>
       <div class="col-md-3">
         <div class="card text-white bg-success mb-3">
-          <div class="card-header" id = "incomeHeader1">Total Sales Quantity </div>
+          <div class="card-header" id = "incomeHeader1">Total Income Quantity </div>
           <div class="card-body">
-            <h5 class="card-title" id="totalSalesQuantity">0</h5>
+            <h5 class="card-title" id="incomeHeader1Val">0</h5>
           </div>
         </div>
       </div>
@@ -52,26 +76,135 @@
         <div class="card text-white bg-info mb-3">
           <div class="card-header" id = "incomeHeader2">Category Sales</div>
           <div class="card-body">
-            <h5 class="card-title" id="reportBestAmountVal">0</h5>
+            <h5 class="card-title" id="incomeHeader2Val">0</h5>
           </div>
         </div>
       </div>
       <div class="col-md-3">
         <div class="card text-white bg-warning mb-3">
-          <div class="card-header" id = "incomeHeader3">Average Sales Per Day</div>
+          <div class="card-header" id = "incomeHeader3">Total Income from Sources</div>
           <div class="card-body">
-            <h5 class="card-title" id="reportAverageSales">0</h5>
+            <h5 class="card-title" id="totalIncomeSources">0</h5>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="salesSummaryCards" style="display: none;">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-header" id="salesHeader0">Total Sales</div>
+          <div class="card-body">
+            <h5 class="card-title" id="totalSales">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-header" id="salesHeader1">Total Sales Quantity </div>
+          <div class="card-body">
+            <h5 class="card-title" id="totalSalesQuantity">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-header" id="salesHeader2">Category Sales</div>
+          <div class="card-body">
+            <h5 class="card-title" id="categoryTotalsales">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+          <div class="card-header" id="salesHeader3">Average Sales Per Day</div>
+          <div class="card-body">
+            <h5 class="card-title" id="averageSales">0</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div id="expensesSummaryCards" style="display: none;">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-header" id="expensesHeader0">Expenses</div>
+          <div class="card-body">
+            <h5 class="card-title" id="expensesHeader0Val">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-header" id="expensesHeader1">Expenses</div>
+          <div class="card-body">
+            <h5 class="card-title" id="expensesHeader1Val">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-header" id="expensesHeader2">Expenses</div>
+          <div class="card-body">
+            <h5 class="card-title" id="expensesHeader2Val">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+          <div class="card-header" id="expensesHeader3">Total Expenses from Sources</div>
+          <div class="card-body">
+            <h5 class="card-title" id="expensesHeader3Val">0</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="summaryCards" style="display: none;">
+  <div class="row">
+    <div class="col-md-3">
+      <div class="card text-white bg-primary mb-3">
+        <div class="card-header" id="incomeHeader0">Total Sales</div>
+        <div class="card-body">
+          <h5 class="card-title" id="totalSummary">0</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-header" id="incomeHeader1">Total Sales Quantity </div>
+        <div class="card-body">
+          <h5 class="card-title" id="totalSummaryQuantity">0</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-info mb-3">
+        <div class="card-header" id="incomeHeader2">Category Sales</div>
+        <div class="card-body">
+          <h5 class="card-title" id="reportBestAmountVal">0</h5>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-warning mb-3">
+        <div class="card-header" id="incomeHeader3">Average Sales Per Day</div>
+        <div class="card-body">
+          <h5 class="card-title" id="reportAverageSales">0</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
 
   <!-- Selling Items Breakdown Table -->
-  <div id="breakdownSection" style="display: none;">
-    <h4>Selling Items Breakdown:</h4>
+  <div id="salesBreakdownSection" style="display: none;">
+    <h4>Best Selling Items Breakdown:</h4>
     <table class="table">
       <thead>
       <tr>
@@ -80,40 +213,115 @@
         <th>Quantity</th>
       </tr>
       </thead>
-      <tbody id="breakdownTbody">
+      <tbody id="salesBreakdownBody">
       <!-- filled by JS -->
       </tbody>
     </table>
   </div>
-  <div id="breakdownSection2" style="display: none;">
+
+  <div id="salesBreakdownSection2" style="display: none;">
+    <h4>Worst Selling Items Breakdown:</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Amount Generated</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody id="salesBreakdownBody2">
+        <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+  
+  <div id="expensesBreakdownSection" style="display: none;">
+    <h4>Summary of Daily Transactions</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Income</th>
+          <th>Expenses</th>
+        </tr>
+      </thead>
+      <tbody id="breakdownTbody3">
+        <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <div id="summaryBreakdownSection" style="display: none;">
     <table class="table">
       <thead>
       <tr>
-        <th>Name</th>
-        <th>Amount Generated</th>
-        <th>Quantity</th>
+        <th >Date</th>
+        <th >Income</th>
+        <th >Expenses</th>
       </tr>
       </thead>
-      <tbody id="breakdownTbody2">
+      <tbody id="summarybreakdownBody">
       <!-- filled by JS -->
       </tbody>
     </table>
   </div>
+
 </div>
 
   <script>
     function naira(amount) {
   return `₦${amount.toLocaleString('en-NG')}`;
     }
+    const select = document.getElementById('typeSelect');
+      const button = document.getElementById('btnLoadReport');
+
+      select.addEventListener('change', () => {
+        if (select.value !== '') {
+          button.disabled = false;
+        } else {
+          button.disabled = true;
+        }
+      });
 
     function loadReportPage() {
      // 2) On "Load Report" => call getDetailedReport()
       document.getElementById("btnLoadReport").addEventListener("click", function() {
+        // clearExistingData();
         getDetailedReport();
+        button.disabled = true;
       });
     }
 
-          async function getDetailedReport() {
+
+    function hideDashboardSections() {
+        const elementIds = [
+          "salesSummaryCards",
+          "expensesSummaryCards",
+          "expensesInfoSection",
+          "salesInfoSection",
+          "salesBreakdownSection",
+          "salesBreakdownSection2",
+          "incomeSummaryCards",
+          "incomeInfoSection",
+          "summaryBreakdownSection"
+        ];
+
+        elementIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = "none";
+        });
+
+        // Remove elements with class "myRow" using jQuery
+        if ($('.myRow').length) {
+          $('.myRow').remove();
+        }
+      }
+
+      // Call the function
+
+
+
+    async function getDetailedReport() {
       const startDate = document.getElementById("startDate").value;
       const endDate = document.getElementById("endDate").value;
       const type = document.getElementById("typeSelect").value;
@@ -143,29 +351,43 @@
             alert(data.error);
             return;
           }
+
+            //remove elements from other reports
+              const el1 = document.getElementById("incomeInfoSection");
+              if (el1) el1.style.display = "none";
+              const el2 = document.getElementById("expensesSummaryCards");
+              if (el2) el2.style.display = "none";
+              const el3 = document.getElementById("expensesInfoSection");
+              if (el3) el3.style.display = "none";
+              const el4 = document.getElementById("incomeSummaryCards");
+              if (el4) el4.style.display = "none";
+              const el7 = document.getElementById("summaryBreakdownSection");
+              if (el7) el7.style.display = "none";
+             
+
           // Show result details
-          document.getElementById("InfoSection").style.display = "block";
-          document.getElementById("reportType").textContent = "Best Selling Category";
-          document.getElementById("reportTypeName").textContent = data.bestSellingCategory;
-          document.getElementById("reportBestAmount").textContent = naira(data.categoryTotalsales);
-          document.getElementById("reportBestCount").textContent = data.categorySalesCount;
+          document.getElementById("salesInfoSection").style.display = "block";
+          document.getElementById("bestSellingCat").textContent = data.bestSellingCategory;
+          document.getElementById("categoryTotalsales").textContent = naira(data.categoryTotalsales);
+          document.getElementById("categorySalesCount").textContent = data.categorySalesCount;
           //get average sales per day
           const totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
           const averageSales = data.totalSales.total / totalDays;
 
+          
             // Show Cards
-          document.getElementById("summaryCards").style.display = "block";
+          document.getElementById("salesSummaryCards").style.display = "block";
           document.getElementById("totalSales").textContent = naira(data.totalSales.total) || 0;
           document.getElementById("totalSalesQuantity").textContent = data.totalSales.quantity || 0;
-          document.getElementById("reportBestAmountVal").textContent = naira(data.categoryTotalsales) || 0;
-          document.getElementById("reportAverageSales").textContent = naira(averageSales);
+          document.getElementById("categoryTotalsales").textContent = naira(data.categoryTotalsales) || 0;
+          document.getElementById("averageSales").textContent = naira(averageSales);
 
 
-          document.getElementById("breakdownSection").style.display = "block";
-          const breakdownBody = document.getElementById("breakdownTbody");
-          breakdownBody.innerHTML = "<b>Best Items</b>";
+          document.getElementById("salesBreakdownSection").style.display = "block";
+          const breakdownBody = document.getElementById("salesBreakdownBody");
           (data.best || []).forEach(d => {
             let row = document.createElement("tr");
+            row.setAttribute("class", "myRow");
             let tdName = document.createElement("td");
             tdName.textContent = d._id;
             let tdCount = document.createElement("td");
@@ -177,11 +399,11 @@
             row.appendChild(tdQty);
             breakdownBody.appendChild(row);
           });
-          document.getElementById("breakdownSection2").style.display = "block";
-          const breakdownBody2 = document.getElementById("breakdownTbody2");
-          breakdownBody2.innerHTML = "<b>Worst Items</b>";
+          document.getElementById("salesBreakdownSection2").style.display = "block";
+          const breakdownBody2 = document.getElementById("salesBreakdownBody2");
           (data.worst || []).forEach(d => {
             let row2 = document.createElement("tr");
+            row2.setAttribute("class", "myRow");
             let tdName2 = document.createElement("td");
             tdName2.textContent = d._id;
             let tdCount2 = document.createElement("td");
@@ -195,12 +417,11 @@
           });
          
           }
-          catch (e) {
-            console.error(err);
+          catch (err) {
+            console.log(err);
             alert("Failed to load report.");
           }
         }
-
         else if (type === "incomes") {
           try {
             const res = await fetch(endpoint, {
@@ -211,32 +432,111 @@
               }
             });
             const data = await res.json()
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
             console.log(data)
-            const totalAmountgen = naira(data[2].totalIncome + data[1].totalIncome + data[0].totalIncome)
-            document.getElementById("InfoSection").style.display = "block";
-            document.getElementById("reportType").textContent = "Top 3 Income Sources";
-            document.getElementById("reportTypeName").textContent = "Income";
-            document.getElementById("reportBestAmount").textContent = totalAmountgen || 0;
-            document.getElementById("reportBestCountItem").style.display = "none";
-            document.getElementById("summaryCards").style.display = "block";
-            document.getElementById("breakdownSection").style.display = "none";
-            document.getElementById("breakdownSection2").style.display = "none";
-            document.getElementById("incomeHeader0").textContent = data[0]._id;
-            document.getElementById("incomeHeader1").textContent = data[1]._id;
-            document.getElementById("incomeHeader2").textContent = data[2]._id;
-            document.getElementById("totalSales").textContent = naira(data[0].totalIncome) || 0;
-            document.getElementById("totalSalesQuantity").textContent = naira(data[1].totalIncome) || 0;
-            document.getElementById("reportBestAmountVal").textContent = naira(data[2].totalIncome) || 0;
-            document.getElementById("incomeHeader3").textContent = "Total Income from Sources";
-            document.getElementById("reportAverageSales").textContent = totalAmountgen || 0;
+            const totalAmount = (data[0]?.totalIncome? data[0].totalIncome : 0) + 
+            (data[1]?.totalIncome? data[1]?.totalIncome : 0) + (data[2]?.totalIncome? data[2].totalIncome : 0);
+            console.log(totalAmount)
+
+            //remove elements from other reports
+            hideDashboardSections()
+            
+
+            //display current elements
+            document.getElementById("incomeInfoSection").style.display = "block";
+            document.getElementById("incomeTotalGenerated").textContent = naira(totalAmount) || 0;
+            document.getElementById("incomeSummaryCards").style.display = "block";
+            document.getElementById("incomeHeader0").textContent = data[0]?._id || "Not Yet Available";
+            document.getElementById("incomeHeader1").textContent = data[1]?._id || "Not Yet Available";
+            document.getElementById("incomeHeader2").textContent = data[2]?._id || "Not Yet Available";
+            document.getElementById("incomeHeader0Val").textContent = naira(data[0]?.totalIncome) || 0;
+            document.getElementById("incomeHeader1Val").textContent = naira(data[1]?.totalIncome) || 0;
+            document.getElementById("incomeHeader2Val").textContent = naira(data[2]?.totalIncome) || 0;
+            document.getElementById("totalIncomeSources").textContent = naira(totalAmount) || 0;
           }
           catch (error) {
-
+            alert(error)
+            return
           }
         }
         else if (type === "expenses") {
-          alert("Report is being worked on");
-          console.log("expenses")
+
+          try {
+                const res = await fetch(endpoint, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+              }
+            });
+            const data = await res.json()
+            console.log(data)
+            if(data.error) {
+              alert(data.error)
+              return
+            }
+             //remove elements from other reports
+            hideDashboardSections()
+
+            const totalAmountgen = naira(data[2].totalExpenses + data[1].totalExpenses + data[0].totalExpenses)
+            document.getElementById("expensesInfoSection").style.display = "block";
+            document.getElementById("reportBestAmount").textContent = totalAmountgen || 0;
+            document.getElementById("reportBestCountItem").style.display = "none";
+            document.getElementById("expensesSummaryCards").style.display = "block";
+            document.getElementById("expensesHeader0").textContent = data[0]._id;
+            document.getElementById("expensesHeader1").textContent = data[1]._id;
+            document.getElementById("expensesHeader2").textContent = data[2]._id;
+            document.getElementById("expensesHeader0Val").textContent = naira(data[0].totalExpenses) || 0;
+            document.getElementById("expensesHeader1Val").textContent = naira(data[1].totalExpenses) || 0;
+            document.getElementById("expensesHeader2Val").textContent = naira(data[2].totalExpenses) || 0;
+            document.getElementById("expensesHeader3Val").textContent = totalAmountgen || 0;
+          }
+          catch(error) {
+              alert(error);
+              return
+          }
+        }
+        else if(type === "summary") {
+          try {
+            const res = await fetch(endpoint, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+              }
+            });
+            const data = await res.json();
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
+            //remove elements from other reports
+            hideDashboardSections()
+
+            document.getElementById("summaryBreakdownSection").style.display = "block";
+            const breakdownBody = document.getElementById("summarybreakdownBody");
+            (data|| []).forEach(d => {
+              let row = document.createElement("tr");
+              row.setAttribute('class', 'myRow')
+              let tdName = document.createElement("td");
+              tdName.textContent = d.date;
+              let tdCount = document.createElement("td");
+              tdCount.textContent = naira(d.income);
+              let tdQty = document.createElement("td");
+              tdQty.textContent = naira(d.expense);
+              row.appendChild(tdName);
+              row.appendChild(tdCount);
+              row.appendChild(tdQty);
+              breakdownBody.appendChild(row);
+            });
+          }
+          catch(error) {
+            alert(error)
+            return
+          }
         }
         }
   </script>
