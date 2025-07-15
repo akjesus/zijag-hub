@@ -421,7 +421,6 @@
                   });
             const body = await res.json();
               if(body.error) return customAlert(body.error)
-                  console.log(body);
               bootstrap.Modal.getInstance(
                 document.getElementById("expenseModal")
               ).hide();
@@ -430,6 +429,7 @@
         }
           
             catch(error) {
+              customAlert(error)
           console.error("Error saving expense:", error);
           bootstrap.Modal.getInstance(document.getElementById("expenseModal")).hide();
             }
