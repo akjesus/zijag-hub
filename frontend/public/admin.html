@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="./css/fontawesome.css" />
     <link rel="stylesheet" href="./fontawesome-free-6.7.2-web/css/all.min.css" />
     <link rel="icon" href="/assets/logo.png" type="image/x-icon" />
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <script src="./js/jspdf.js"></script>
+
     <style>
       a:link {
         text-decoration: none;
@@ -255,15 +258,16 @@
         <button id="custom-alert-cancel" style="display: none;">Cancel</button>
       </div>
     </div>
-
+<br>
+<br>
     <div class="top-nav">
       <div class="logo">
         <img src="/assets/logo.png" alt="Logo" />
         <h5>Zijag Hub</h5>
       </div>
-      <div>
-        <span id="username" class ="username" onclick="logout()"> <i class="fas fa-user"></i>  </span>
-        <img src="/assets/logo.png" alt="Profile" class="profile-img" />
+      <div onclick="logout()">
+        <span id="username" class ="username"> <i class="fas fa-user"></i>  </span>
+        <img src="/assets/logo.png" alt="Profile" class="profile-img username" />
       </div>
     </div>
     <div class="container-fluid">

@@ -50,7 +50,7 @@
     <h4>Report Info: <span id="salesHeader"></span></h4>
     <p><strong>Report Type:</strong> <span>Best / Worst Selling Items</span></p>
     <p><strong>Best Selling Category:</strong> <span id="bestSellingCat"></span></p>
-    <p><strong>Amount Generated:</strong> <span id="categoryTotalsales"></span></p>
+    <p><strong>Amount Generated:</strong> <span id="catTotalsales"></span></p>
     <p><strong>Number of Items:</strong> <span id="categorySalesCount"></span></p>
   </div>
 
@@ -331,6 +331,32 @@
     });
   }
 
+  async function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+
+      const container = document.getElementById("reportContainer");
+      const canvas = await html2canvas(container, { scale: 2 });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgRatio = imgProps.width / imgProps.height;
+      const pdfWidth = pageWidth;
+      const pdfHeight = pageWidth / imgRatio;
+
+      let position = 10;
+      if (pdfHeight > pageHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      } else {
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      }
+
+      pdf.save('daily_financial_report.pdf');
+    }
 
     const select = document.getElementById('typeSelect');
       const button = document.getElementById('btnLoadReport');
@@ -460,7 +486,7 @@
           document.getElementById("salesInfoSection").style.display = "block";
            document.getElementById("salesHeader").textContent = `From ${formatDateLong(startDate)} to ${formatDateLong(endDate)}`;
           document.getElementById("bestSellingCat").textContent = data.bestSellingCategory;
-          document.getElementById("categoryTotalsales").textContent = naira(data.categoryTotalsales);
+          document.getElementById("catTotalsales").textContent = naira(data.categoryTotalsales);
           document.getElementById("categorySalesCount").textContent = data.categorySalesCount;
           //get average sales per day
           const totalDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;

@@ -1,6 +1,6 @@
 const Sales = require("../models/SalesModel");
 const Category = require("../models/CategoryModel");
-
+const { jsPDF } = require("jspdf");
 exports.getAllSales = async (req, res) => {
   try {
     const sales = await Sales.find()
@@ -93,4 +93,58 @@ exports.updateSales = async (req, res) => {
   }
 };
 
+exports.generateReceipt = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: "sales ID is required" });
+  }
+  try {
+    const sales = await Sales.findById(id)
+    if (!sales) { 
+      return res.status(404).json({ message: "sales not found" });
+    }
+    res.status(200).json([sales]);
+  } catch (error) {
+    console.error("Error generating receipt data:", error);    
+    res.status(500).json({ error: error.message });
+  }
+}
 
+exports.generateReceipt2 = async (req, res) => {
+	const { id } = req.params;
+	if (!id) {
+		return res.status(400).json({ message: "sales ID is required" });
+	}
+	try {
+		const sales = await Sales.findById(id)
+			.populate("createdBy", "username")
+			.populate("category", "name");
+		if (!sales) {
+			return res.status(404).json({ message: "sales not found" });
+		}
+
+		const doc = new jsPDF();
+		doc.setFont("helvetica", "normal");
+		doc.setFontSize(16);
+		doc.text("Sales Receipt", 20, 20);
+		doc.setFontSize(12);
+
+		doc.text(`Title: ${sales.title}`, 20, 30);
+		doc.text(`Category: ${sales.category.name}`, 20, 40);
+		doc.text(`Amount: ${sales.amount}`, 20, 50);
+		doc.text(`Description: ${sales.description || "N/A"}`, 20, 60);
+		doc.text(`Source: ${sales.source || "N/A"}`, 20, 70);
+		doc.text(`Created By: ${sales.createdBy.username}`, 20, 80);
+		doc.text(`Date: ${new Date(sales.createdAt).toLocaleDateString()}`, 20, 90);
+		doc.text(
+			`Time: ${new Date(sales.createdAt).toLocaleTimeString()}`,
+			20,
+			100
+		);
+		const pdfOutput = doc.output("datauristring");
+		res.status(200).json({ pdf: pdfOutput });
+	} catch (error) {
+		console.error("Error generating receipt:", error);
+		res.status(500).json({ error: error.message });
+	}
+};

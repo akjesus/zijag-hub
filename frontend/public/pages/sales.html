@@ -182,7 +182,6 @@
     </div>
   </div>
 </div>
-
 <script>
   
    function naira(amount) {
@@ -313,6 +312,9 @@
               </button>
               <button class="btn btn-sm btn-danger" onclick="removeSales(${"'" + row._id + "'"})">
                 Delete
+              </button>
+              <button class="btn btn-sm btn-info" onclick="generateReceiptPDF(${"'" + row._id + "'"})">
+                Generate Receipt
               </button>
             `;
           },
@@ -493,7 +495,104 @@ async function removeSales(id) {
       })
       .catch(() => customAlert("Failed to import CSV."));
   }
-</script>
+
+  async function generateReceiptPDF(id) {
+    const logoImage = new Image();
+    let logoBase64;
+    logoImage.src = './assets/logo.png'; // or base64 directly
+    logoImage.onload = function () {
+      const canvas = document.createElement('canvas');
+      canvas.width = logoImage.width;
+      canvas.height = logoImage.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(logoImage, 0, 0);
+      logoBase64 = canvas.toDataURL('image/png');
+    };
+    const res = await fetch(API_URL + "sales/receipt/" + id, {
+      method: "GET",
+      headers: { "Content-Type": "application/json",
+      Authorization: `Bearer ${token}` }
+    });
+      const data = await res.json();
+      const { jsPDF } = window.jspdf;
+
+    // Width for 80mm receipt: approx 80mm = 226.77 points
+    const doc = new jsPDF({
+      unit: 'pt',
+      format: [226.77, 1000], // dynamic height
+      orientation: 'portrait'
+    });
+
+    let y = 20;
+
+    // Add Logo (Optional)
+    if (logoBase64) {
+      doc.addImage(logoBase64, 'PNG', 60, y, 100, 40); // adjust size & position
+      y += 50;
+    }
+
+    // Business Info
+    doc.setFontSize(10);
+    doc.setFont(undefined, "bold");
+    doc.text("Zijag Educational Hub", 113, y, { align: "center" });
+    y += 12;
+    doc.setFont(undefined, "normal");
+    doc.text("Nike Road, Enugu", 113, y, { align: "center" });
+    y += 12;
+    doc.text("Phone: 07066377348", 113, y, { align: "center" });
+    y += 20;
+
+    // Date
+    doc.setFontSize(8);
+    doc.text(`Date: ${new Date().toLocaleString()}`, 10, y);
+    y += 12;
+
+    // Divider
+    doc.line(10, y, 216, y);
+    y += 10;
+
+    // Table headers
+    doc.setFont(undefined, "bold");
+    doc.text("Item", 10, y);
+    doc.text("Qty", 125, y);
+    doc.text("Price", 145, y);
+    doc.text("Total", 180, y);
+    y += 12;
+    doc.setFont(undefined, "normal");
+
+    let grandTotal = 0;
+
+    data.forEach(item => {
+      const total = item.quantity * item.amount;
+      grandTotal += total;
+      let itemName = item.description.length > 28 ? item.description.substring(0, 28) + '…' : item.description;
+      doc.text(itemName, 10, y);
+      doc.text(item.quantity.toString(), 125, y);
+      doc.text(`N${item.amount.toLocaleString('en-NG')}`, 145, y);
+      doc.text(`N${total.toLocaleString('en-NG')}`, 180, y);
+      y += 12;
+    });
+
+    y += 10;
+    doc.line(10, y, 216, y);
+    y += 12;
+
+    doc.setFont(undefined, "bold");
+    doc.text("Total:", 140, y);
+    doc.text(`N${grandTotal.toLocaleString('en-NG')}`, 180, y);
+
+    // Footer
+    y += 30;
+    doc.setFontSize(9);
+    doc.setFont(undefined, "italic");
+    doc.text("Thank you for shopping!", 113, y, { align: "center" });
+
+    // Save
+    doc.save(`${new Date().toLocaleString()}` + "_receipt.pdf");
+    }
+
+
+    </script>
 <script>
   /* Re-init DataTable after dynamic load if needed */
   setTimeout(initDataTable, 100);

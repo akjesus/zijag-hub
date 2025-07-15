@@ -14,4 +14,11 @@ router.get("/:id", SalesController.findSalesById).put(
   isAdmin,
   SalesController.updateSales
 ).delete("/:id", verifyToken, isAdmin, SalesController.deleteSales);
+router.get(
+  "/receipt/:id",
+  verifyToken,
+  isAdmin,
+  SalesController.generateReceipt
+);
+
 module.exports = router;
