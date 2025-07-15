@@ -10,6 +10,7 @@ router.get("/summary", ReportController.getSummaryReport);
 router.get("/sales", ReportController.salesReport);
 router.get("/incomes", ReportController.incomeReport);
 router.get("/expenses", ReportController.expenseReport);
+router.get("/daily", ReportController.getDailyItemsAndTotals);
 
 module.exports = router;
 

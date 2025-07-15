@@ -360,3 +360,68 @@ if (!result.length) {
  return res.json(result);
 
 }
+
+exports.getDailyItemsAndTotals = async (req, res) => {
+	const { startDate, endDate } = req.query;
+	console.log(startDate, endDate);
+	if ((!startDate || !endDate))
+		return res.status(400).json({ error: "Invalid Date" });
+  const start = new Date(startDate);
+	const end = new Date(endDate);
+	end.setHours(23, 59, 59, 999);
+
+	// Fetch all incomes and expenses in range
+	const [incomes, expenses] = await Promise.all([
+		Income.find({ createdAt: { $gte: start, $lte: end } }),
+		Expense.find({ createdAt: { $gte: start, $lte: end } }),
+	]);
+
+	// Helper to format date as YYYY-MM-DD
+	const formatDate = (date) => new Date(date).toISOString().slice(0, 10);
+
+	// Group data by day
+	const reportMap = {};
+
+	incomes.forEach((item) => {
+		const date = formatDate(item.createdAt);
+		if (!reportMap[date]) {
+			reportMap[date] = {
+				date,
+				incomes: [],
+				expenses: [],
+				totalIncome: 0,
+				totalExpense: 0,
+			};
+		}
+		reportMap[date].incomes.push(item);
+		reportMap[date].totalIncome += item.amount;
+	});
+
+	expenses.forEach((item) => {
+		const date = formatDate(item.createdAt);
+		if (!reportMap[date]) {
+			reportMap[date] = {
+				date,
+				incomes: [],
+				expenses: [],
+				totalIncome: 0,
+				totalExpense: 0,
+			};
+		}
+		reportMap[date].expenses.push(item);
+		reportMap[date].totalExpense += item.amount;
+	});
+
+	// Add net total and convert to sorted array
+	const dailyReport = Object.values(reportMap)
+		.map((day) => ({
+			...day,
+			netTotal: day.totalIncome - day.totalExpense,
+		}))
+		.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+	// return dailyReport;
+  return res.status(200).json({
+		dailyReport,
+	});
+}

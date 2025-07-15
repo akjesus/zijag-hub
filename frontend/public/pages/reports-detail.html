@@ -1,8 +1,10 @@
 
 <div class="container mt-4">
   <h2>Detailed Reports</h2>
-
+<button class="btn btn-primary" onclick="customAlert('Coming Soon!')">Export to CSV</button>
   <!-- Select Type Selection-->
+   <br>
+   <br>
   <div class="mb-3">
     <label for="typeSelect" class="form-label">Type:</label>
     <select id="typeSelect" class="form-select" style="width: 200px; display: inline-block;">
@@ -11,6 +13,7 @@
       <option value="sales">Sales</option>
       <option value="expenses">Expenses</option>
       <option value="summary">Summary</option>
+      <option value="daily">Daily</option>
     </select>
     <!-- Date range -->
     <label for="startDate" class="form-label ms-3">Start Date:</label>
@@ -24,29 +27,26 @@
 
   <!-- Exam Info Section -->
   <div id="incomeInfoSection" style="display: none;" class="mb-4">
-    <h4>Report Info: </h4>
+    <h4>Report Info: <span id ="reportInfo"></span></h4>
     <p><strong>Report Type:</strong> <span id="reportType">Top 3 Income Sources</span></p>
     <p><strong>Item:</strong> <span> Income</span></p>
     <p><strong>Amount Generated:</strong> <span id="incomeTotalGenerated"></span></p>
   </div>
 
   <div id="summaryInfoSection" style="display: none;" class="mb-4">
-    <h4>Report Info:</h4>
-    <p><strong>Report Type:</strong> <span id="reportType"></span></p>
-    <p><strong>Item:</strong> <span id="reportTypeName"></span></p>
-    <p id="incomeItem"><strong>Amount Generated:</strong> <span id="reportBestAmount"></span></p>
-    <p id="reportBestCountItem"><strong>Number of Items:</strong> <span id="reportBestCount"></span></p>
+    <h4>Report Info: <span id="summaryHeader"></span></h4>
+    <p><strong>Report Type: Summary</strong> <span id="reportType"></span></p>
   </div>
 
   <div id="expensesInfoSection" style="display: none;" class="mb-4">
-    <h4>Report Info:</h4>
+    <h4>Report Info: <span id="expensesHeader"></span></h4>
     <p><strong>Report Type:</strong> <span> Top 3 Expenses Sources</span></p>
     <p><strong>Item:</strong> <span>Expenses</span></p>
     <p id="incomeItem"><strong>Amount Generated:</strong> <span id="expensesBestAmount"></span></p>
   </div>
 
   <div id="salesInfoSection" style="display: none;" class="mb-4">
-    <h4>Report Info:</h4>
+    <h4>Report Info: <span id="salesHeader"></span></h4>
     <p><strong>Report Type:</strong> <span>Best / Worst Selling Items</span></p>
     <p><strong>Best Selling Category:</strong> <span id="bestSellingCat"></span></p>
     <p><strong>Amount Generated:</strong> <span id="categoryTotalsales"></span></p>
@@ -265,7 +265,7 @@
       </tbody>
     </table>
   </div>
-
+<div id="reportContainer" style="display: none;"></div>
 </div>
 
   <script>
@@ -273,6 +273,25 @@
   return `₦${amount.toLocaleString('en-NG')}`;
     }
 
+    function formatDateLong(dateStr) {
+        const date = new Date(dateStr);
+        const day = date.getDate();
+
+        const getOrdinal = (n) => {
+          if (n > 3 && n < 21) return 'th';
+          switch (n % 10) {
+            case 1: return 'st';
+            case 2: return 'nd';
+            case 3: return 'rd';
+            default: return 'th';
+          }
+        };
+
+        const month = date.toLocaleString('default', { month: 'long' });
+        const year = date.getFullYear();
+
+        return `${day}${getOrdinal(day)} ${month} ${year}`;
+      }
   async function customAlert(message, options = {}) {
     return new Promise((resolve) => {
       const customAlert = document.getElementById('custom-alert');
@@ -335,15 +354,18 @@
 
     function hideDashboardSections() {
         const elementIds = [
-          "salesSummaryCards",
+
           "expensesSummaryCards",
           "expensesInfoSection",
           "salesInfoSection",
           "salesBreakdownSection",
           "salesBreakdownSection2",
+          "salesSummaryCards",
           "incomeSummaryCards",
           "incomeInfoSection",
-          "summaryBreakdownSection"
+          "summaryBreakdownSection",
+          "reportContainer",
+          "summaryInfoSection"
         ];
 
         elementIds.forEach(id => {
@@ -358,8 +380,48 @@
       }
 
       // Call the function
+  function displayReport(data) {
+    hideDashboardSections()
+    console.log(data)
+    const container = document.getElementById('reportContainer');
+    container.style.display='block';
+    (data.dailyReport.forEach((day) => {
+      const reportEl = document.createElement('div');
+      reportEl.className = 'day-report';
 
+      reportEl.innerHTML = `
+          <h2>Date: ${formatDateLong(day.date)}</h2>
+          <h3>Incomes</h3>
+          <table>
+            <tr><th>Description</th><th>Amount</th></tr>
+            ${day.incomes.map(item => `
+              <tr>
+                <td>${item.description}</td>
+                <td>₦${item.amount}</td>
+              </tr>`).join('')}
+          </table>
 
+          <h3>Expenses</h3>
+          <table>
+            <tr><th>Description</th><th>Amount</th></tr>
+            ${day.expenses.map(item => `
+              <tr>
+                <td>${item.description}</td>
+                <td>₦${item.amount}</td>
+              </tr>`).join('')}
+          </table>
+
+          <div class="totals">
+            Total Income: ₦${day.totalIncome} <br>
+            Total Expense: ₦${day.totalExpense} <br>
+            Net Total: <span class="${day.netTotal >= 0 ? 'net-positive' : 'net-negative'}">
+              ₦${day.netTotal}
+            </span>
+          </div>
+        `;
+      container.appendChild(reportEl);
+    }));
+  }
 
     async function getDetailedReport() {
       const startDate = document.getElementById("startDate").value;
@@ -385,7 +447,6 @@
         }
             });
             const data = await res.json();
-          console.log(data)
           // If no participants or error
           if (data.error) {
             customAlert(data.error);
@@ -393,20 +454,10 @@
           }
 
             //remove elements from other reports
-              const el1 = document.getElementById("incomeInfoSection");
-              if (el1) el1.style.display = "none";
-              const el2 = document.getElementById("expensesSummaryCards");
-              if (el2) el2.style.display = "none";
-              const el3 = document.getElementById("expensesInfoSection");
-              if (el3) el3.style.display = "none";
-              const el4 = document.getElementById("incomeSummaryCards");
-              if (el4) el4.style.display = "none";
-              const el7 = document.getElementById("summaryBreakdownSection");
-              if (el7) el7.style.display = "none";
-             
-
+             hideDashboardSections()
           // Show result details
           document.getElementById("salesInfoSection").style.display = "block";
+           document.getElementById("salesHeader").textContent = `From ${formatDateLong(startDate)} to ${formatDateLong(endDate)}`;
           document.getElementById("bestSellingCat").textContent = data.bestSellingCategory;
           document.getElementById("categoryTotalsales").textContent = naira(data.categoryTotalsales);
           document.getElementById("categorySalesCount").textContent = data.categorySalesCount;
@@ -417,9 +468,9 @@
           
             // Show Cards
           document.getElementById("salesSummaryCards").style.display = "block";
-          document.getElementById("totalSales").textContent = naira(data.totalSales.total) || 0;
+          document.getElementById("totalSales").textContent = naira(data.totalSales.total) || naira(0);
           document.getElementById("totalSalesQuantity").textContent = data.totalSales.quantity || 0;
-          document.getElementById("categoryTotalsales").textContent = naira(data.categoryTotalsales) || 0;
+          document.getElementById("categoryTotalsales").textContent = naira(data.categoryTotalsales) || naira(0);
           document.getElementById("averageSales").textContent = naira(averageSales);
 
 
@@ -476,10 +527,8 @@
               customAlert(data.error);
               return;
             }
-            console.log(data)
-            const totalAmount = (data[0]?.totalIncome? data[0].totalIncome : 0) + 
-            (data[1]?.totalIncome? data[1]?.totalIncome : 0) + (data[2]?.totalIncome? data[2].totalIncome : 0);
-            console.log(totalAmount)
+            const totalAmount = (data[0]? data[0].totalIncome : 0) + 
+            (data[1]? data[1]?.totalIncome : 0) + (data[2]? data[2].totalIncome : 0);
 
             //remove elements from other reports
             hideDashboardSections()
@@ -487,15 +536,16 @@
 
             //display current elements
             document.getElementById("incomeInfoSection").style.display = "block";
-            document.getElementById("incomeTotalGenerated").textContent = naira(totalAmount) || 0;
+            document.getElementById("reportInfo").textContent = `From ${formatDateLong(startDate)} to ${formatDateLong(endDate)}`;
+            document.getElementById("incomeTotalGenerated").textContent = naira(totalAmount) || naira(0);
             document.getElementById("incomeSummaryCards").style.display = "block";
             document.getElementById("incomeHeader0").textContent = data[0]?._id || "Not Yet Available";
             document.getElementById("incomeHeader1").textContent = data[1]?._id || "Not Yet Available";
             document.getElementById("incomeHeader2").textContent = data[2]?._id || "Not Yet Available";
-            document.getElementById("incomeHeader0Val").textContent = naira(data[0]?.totalIncome) || 0;
-            document.getElementById("incomeHeader1Val").textContent = naira(data[1]?.totalIncome) || 0;
-            document.getElementById("incomeHeader2Val").textContent = naira(data[2]?.totalIncome) || 0;
-            document.getElementById("totalIncomeSources").textContent = naira(totalAmount) || 0;
+            document.getElementById("incomeHeader0Val").textContent = data[0]? naira(data[0].totalIncome) : naira(0);
+            document.getElementById("incomeHeader1Val").textContent = data[1]? naira(data[1].totalIncome) : naira(0);
+            document.getElementById("incomeHeader2Val").textContent = data[2]? naira(data[2].totalIncome) : naira(0);
+            document.getElementById("totalIncomeSources").textContent = naira(totalAmount) || naira(0);
           }
           catch (error) {
             customAlert(error)
@@ -520,19 +570,20 @@
             }
              //remove elements from other reports
             hideDashboardSections()
-
-            const totalAmountgen = naira(data[2].totalExpenses + data[1].totalExpenses + data[0].totalExpenses)
+            const totalAmount = (data[0] ? data[0].totalExpenses : 0) +
+              (data[1] ? data[1]?.totalExpenses : 0) + (data[2] ? data[2].totalExpenses : 0);
             document.getElementById("expensesInfoSection").style.display = "block";
-            document.getElementById("reportBestAmount").textContent = totalAmountgen || 0;
+             document.getElementById("expensesHeader").textContent = `From ${formatDateLong(startDate)} to ${formatDateLong(endDate)}`;
+            document.getElementById("reportBestAmount").textContent = naira(totalAmount) || 0;
             document.getElementById("reportBestCountItem").style.display = "none";
             document.getElementById("expensesSummaryCards").style.display = "block";
-            document.getElementById("expensesHeader0").textContent = data[0]._id;
-            document.getElementById("expensesHeader1").textContent = data[1]._id;
-            document.getElementById("expensesHeader2").textContent = data[2]._id;
-            document.getElementById("expensesHeader0Val").textContent = naira(data[0].totalExpenses) || 0;
-            document.getElementById("expensesHeader1Val").textContent = naira(data[1].totalExpenses) || 0;
-            document.getElementById("expensesHeader2Val").textContent = naira(data[2].totalExpenses) || 0;
-            document.getElementById("expensesHeader3Val").textContent = totalAmountgen || 0;
+            document.getElementById("expensesHeader0").textContent = data[0] ? data[0]._id : "Not Available"
+            document.getElementById("expensesHeader1").textContent = data[1] ? data[1]._id : "Not Available"
+            document.getElementById("expensesHeader2").textContent = data[2] ? data[2]._id : "Not Available"
+            document.getElementById("expensesHeader0Val").textContent = data[0] ? naira(data[0].totalExpenses) : naira(0)
+            document.getElementById("expensesHeader1Val").textContent = data[1] ? naira(data[1].totalExpenses) : naira(0)
+            document.getElementById("expensesHeader2Val").textContent = data[2] ? naira(data[2].totalExpenses) : naira(0)
+            document.getElementById("expensesHeader3Val").textContent = naira(totalAmount) || 0;
           }
           catch(error) {
               customAlert(error);
@@ -557,12 +608,14 @@
             hideDashboardSections()
 
             document.getElementById("summaryBreakdownSection").style.display = "block";
+            document.getElementById("summaryInfoSection").style.display = "block";
+             document.getElementById("summaryHeader").textContent = `From ${formatDateLong(startDate)} to ${formatDateLong(endDate)}`;
             const breakdownBody = document.getElementById("summarybreakdownBody");
             (data|| []).forEach(d => {
               let row = document.createElement("tr");
               row.setAttribute('class', 'myRow')
               let tdName = document.createElement("td");
-              tdName.textContent = d.date;
+              tdName.textContent = formatDateLong(d.date);
               let tdCount = document.createElement("td");
               tdCount.textContent = naira(d.income);
               let tdQty = document.createElement("td");
@@ -578,7 +631,32 @@
             return
           }
         }
+        else if(type === "daily") {
+          try {
+            const res = await fetch(endpoint, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+              }
+            });
+            const data = await res.json()
+            if (data.error) {
+              customAlert(data.error);
+              return;
+            }
+            
+            displayReport(data);
+            return
+          }
+          catch (error) {
+            customAlert(error);
+            return
+          }
+
         }
+        }
+       
   </script>
 <script>
     /* Re-init DataTable after dynamic load if needed */

@@ -12,7 +12,9 @@ document.getElementById("logout-btn").addEventListener("click", function () {
  function naira(amount) {
 		return `₦${amount.toLocaleString("en-NG")}`;
  }
-function logoutAdmin() {
+async function logoutAdmin() {
+   const proceed = await customAlert('Are you sure you want to logout?', { confirm: true });
+        if (!proceed) return
   localStorage.removeItem("token"); // Remove stored token
   window.location.href = "/admin-login.html"; // Redirect to login
 }

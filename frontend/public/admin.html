@@ -165,7 +165,36 @@
 #custom-alert-cancel:hover {
   background-color: #fa0f0f;
 }
-
+.day-report {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 5px solid #4caf50;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .day-report h2 {
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    .totals {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .net-positive {
+      color: green;
+    }
+    .net-negative {
+      color: red;
+    }
 
 
     </style>
@@ -214,7 +243,6 @@
           localStorage.removeItem("token"); // Remove stored token
           window.location.href = "/admin-login.html"; // Redirect to login
           console.log(process.env)
-         
       }
 
     </script>

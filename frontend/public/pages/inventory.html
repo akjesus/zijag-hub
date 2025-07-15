@@ -321,7 +321,25 @@
         });
       });
     }
+  function formatDateLong(dateStr) {
+    const date = new Date(dateStr);
+    const day = date.getDate();
 
+    const getOrdinal = (n) => {
+      if (n > 3 && n < 21) return 'th';
+      switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+
+    const month = date.toLocaleString('default', { month: 'long' });
+    const year = date.getFullYear();
+
+    return `${day}${getOrdinal(day)} ${month} ${year}`;
+  }
     document.addEventListener("DOMContentLoaded", function () {
       initDataTable();
       // Form Submits
@@ -361,8 +379,6 @@
       .catch(() => customAlert("Failed to load Categories."));
     }
     function initDataTable() {
-      function dateToString(date) {
-        return new Date(date).toLocaleDateString();}
       inventoryTable = $("#inventoryTable").DataTable({
         processing: true,
         ajax: {
@@ -391,7 +407,7 @@
           else return `<b> <p style="color:green"> ${row.quantity}</p> </b>`
           } },
           { data: function (row) {
-          return dateToString(row.createdAt)
+          return formatDateLong(row.createdAt)
         }},
           {
             data: null,

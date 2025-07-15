@@ -57,7 +57,7 @@
           const data = await response.json();
           if (response.ok) {
             localStorage.setItem("token", data.token);
-            window.location.href = "/admin";
+            window.location.href = "/admin.html";
           } else {
             document.getElementById("error-message").innerText = data.error;
           }
